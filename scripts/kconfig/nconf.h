@@ -14,8 +14,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+<<<<<<< HEAD
 #include <locale.h>
 #include <curses.h>
+=======
+#include <ncurses.h>
+>>>>>>> 694c49a7c01c (kconfig: drop localization support)
 #include <menu.h>
 #include <panel.h>
 #include <form.h>

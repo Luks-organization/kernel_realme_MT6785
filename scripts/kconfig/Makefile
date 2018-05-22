@@ -3,8 +3,13 @@
 # Kernel configuration targets
 # These targets are used from top-level makefile
 
+<<<<<<< HEAD
 PHONY += xconfig gconfig menuconfig config localmodconfig localyesconfig \
 	build_menuconfig build_nconfig build_gconfig build_xconfig
+=======
+PHONY += xconfig gconfig menuconfig config syncconfig \
+	localmodconfig localyesconfig
+>>>>>>> 694c49a7c01c (kconfig: drop localization support)
 
 ifdef KBUILD_KCONFIG
 Kconfig := $(KBUILD_KCONFIG)
@@ -56,29 +61,6 @@ localyesconfig localmodconfig: $(obj)/streamline_config.pl $(obj)/conf
 			$(obj)/conf $(silent) --silentoldconfig $(Kconfig); \
 	fi
 	$(Q)rm -f .tmp.config
-
-# Create new linux.pot file
-# Adjust charset to UTF-8 in .po file to accept UTF-8 in Kconfig files
-update-po-config: $(obj)/kxgettext $(obj)/gconf.glade.h
-	$(Q)$(kecho) "  GEN     config.pot"
-	$(Q)xgettext --default-domain=linux                         \
-	    --add-comments --keyword=_ --keyword=N_                 \
-	    --from-code=UTF-8                                       \
-	    --files-from=$(srctree)/scripts/kconfig/POTFILES.in     \
-	    --directory=$(srctree) --directory=$(objtree)           \
-	    --output $(obj)/config.pot
-	$(Q)sed -i s/CHARSET/UTF-8/ $(obj)/config.pot
-	$(Q)(for i in `ls $(srctree)/arch/*/Kconfig      \
-	    $(srctree)/arch/*/um/Kconfig`;               \
-	    do                                           \
-		$(kecho) "  GEN     $$i";                    \
-		$(obj)/kxgettext $$i                     \
-		     >> $(obj)/config.pot;               \
-	    done )
-	$(Q)$(kecho) "  GEN     linux.pot"
-	$(Q)msguniq --sort-by-file --to-code=UTF-8 $(obj)/config.pot \
-	    --output $(obj)/linux.pot
-	$(Q)rm -f $(obj)/config.pot
 
 # These targets map 1:1 to the commandline options of 'conf'
 simple-targets := oldconfig allnoconfig allyesconfig allmodconfig \
@@ -185,6 +167,7 @@ lxdialog := lxdialog/checklist.o lxdialog/util.o lxdialog/inputbox.o
 lxdialog += lxdialog/textbox.o lxdialog/yesno.o lxdialog/menubox.o
 
 conf-objs	:= conf.o  zconf.tab.o
+<<<<<<< HEAD
 mconf-objs     := mconf.o zconf.tab.o $(lxdialog)
 nconf-objs     := nconf.o zconf.tab.o nconf.gui.o
 kxgettext-objs	:= kxgettext.o zconf.tab.o
@@ -211,6 +194,13 @@ always := dochecklxdialog
 HOST_EXTRACFLAGS += $(shell $(CONFIG_SHELL) $(srctree)/$(src)/check.sh $(HOSTCC) $(HOSTCFLAGS))
 HOST_EXTRACXXFLAGS += $(shell $(CONFIG_SHELL) $(srctree)/$(src)/check.sh $(HOSTCXX) $(HOSTCXXFLAGS))
 
+=======
+
+hostprogs-y := conf
+
+targets		+= zconf.lex.c
+
+>>>>>>> 694c49a7c01c (kconfig: drop localization support)
 # generated files seem to need this to find local include files
 HOSTCFLAGS_zconf.lex.o	:= -I$(src)
 HOSTCFLAGS_zconf.tab.o	:= -I$(src)
@@ -285,6 +275,7 @@ endif
 
 $(obj)/zconf.tab.o: $(obj)/zconf.lex.c
 
+<<<<<<< HEAD
 $(obj)/qconf.o: $(obj)/qconf.moc
 
 quiet_cmd_moc = MOC     $@
@@ -297,3 +288,14 @@ $(obj)/%.moc: $(src)/%.h $(obj)/.tmp_qtcheck
 $(obj)/gconf.glade.h: $(obj)/gconf.glade
 	$(Q)intltool-extract --type=gettext/glade --srcdir=$(srctree) \
 	$(obj)/gconf.glade
+=======
+# check if necessary packages are available, and configure build flags
+define filechk_conf_cfg
+	$(CONFIG_SHELL) $<
+endef
+
+$(obj)/.%conf-cfg: $(src)/%conf-cfg.sh FORCE
+	$(call filechk,conf_cfg)
+
+clean-files += .*conf-cfg
+>>>>>>> 694c49a7c01c (kconfig: drop localization support)
