@@ -167,16 +167,6 @@ static inline u32 gpu_read(struct etnaviv_gpu *gpu, u32 reg)
 	return etnaviv_readl(gpu->mmio + reg);
 }
 
-static inline bool fence_completed(struct etnaviv_gpu *gpu, u32 fence)
-{
-	return fence_after_eq(gpu->completed_fence, fence);
-}
-
-static inline bool fence_retired(struct etnaviv_gpu *gpu, u32 fence)
-{
-	return fence_after_eq(gpu->retired_fence, fence);
-}
-
 int etnaviv_gpu_get_param(struct etnaviv_gpu *gpu, u32 param, u64 *value);
 
 int etnaviv_gpu_init(struct etnaviv_gpu *gpu);
