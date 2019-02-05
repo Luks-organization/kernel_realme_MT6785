@@ -69,6 +69,14 @@ enum qlink_phy_mode {
 	QLINK_PHYMODE_BGN	= BIT(0),
 	QLINK_PHYMODE_AN	= BIT(1),
 	QLINK_PHYMODE_AC	= BIT(2),
+	QLINK_HW_CAPAB_REG_UPDATE		= BIT(0),
+	QLINK_HW_CAPAB_STA_INACT_TIMEOUT	= BIT(1),
+	QLINK_HW_CAPAB_DFS_OFFLOAD		= BIT(2),
+	QLINK_HW_CAPAB_SCAN_RANDOM_MAC_ADDR	= BIT(3),
+	QLINK_HW_CAPAB_PWR_MGMT			= BIT(4),
+	QLINK_HW_CAPAB_OBSS_SCAN		= BIT(5),
+	QLINK_HW_CAPAB_SCAN_DWELL		= BIT(6),
+	QLINK_HW_CAPAB_SAE			= BIT(8),
 };
 
 enum qlink_iface_type {
@@ -169,6 +177,9 @@ enum qlink_cmd_type {
 	QLINK_CMD_CHAN_STATS		= 0x0054,
 	QLINK_CMD_CONNECT		= 0x0060,
 	QLINK_CMD_DISCONNECT		= 0x0061,
+	QLINK_CMD_PM_SET		= 0x0062,
+	QLINK_CMD_WOWLAN_SET		= 0x0063,
+	QLINK_CMD_EXTERNAL_AUTH		= 0x0066,
 };
 
 /**
@@ -395,6 +406,20 @@ struct qlink_cmd_connect {
 	__le16 channel;
 	__le16 bg_scan_period;
 	u8 bssid[ETH_ALEN];
+	u8 payload[0];
+} __packed;
+
+/**
+ * struct qlink_cmd_external_auth - data for QLINK_CMD_EXTERNAL_AUTH command
+ *
+ * @bssid: BSSID of the BSS to connect to
+ * @status: authentication status code
+ * @payload: variable portion of connection request.
+ */
+struct qlink_cmd_external_auth {
+	struct qlink_cmd chdr;
+	u8 bssid[ETH_ALEN];
+	__le16 status;
 	u8 payload[0];
 } __packed;
 
@@ -692,6 +717,8 @@ enum qlink_event_type {
 	QLINK_EVENT_BSS_JOIN		= 0x0026,
 	QLINK_EVENT_BSS_LEAVE		= 0x0027,
 	QLINK_EVENT_FREQ_CHANGE		= 0x0028,
+	QLINK_EVENT_RADAR		= 0x0029,
+	QLINK_EVENT_EXTERNAL_AUTH	= 0x0030,
 };
 
 /**
@@ -847,6 +874,46 @@ enum qlink_scan_complete_flags {
 struct qlink_event_scan_complete {
 	struct qlink_event ehdr;
 	__le32 flags;
+} __packed;
+
+enum qlink_radar_event {
+	QLINK_RADAR_DETECTED,
+	QLINK_RADAR_CAC_FINISHED,
+	QLINK_RADAR_CAC_ABORTED,
+	QLINK_RADAR_NOP_FINISHED,
+	QLINK_RADAR_PRE_CAC_EXPIRED,
+	QLINK_RADAR_CAC_STARTED,
+};
+
+/**
+ * struct qlink_event_radar - data for QLINK_EVENT_RADAR event
+ *
+ * @chan: channel on which radar event happened.
+ * @event: radar event type, one of &enum qlink_radar_event.
+ */
+struct qlink_event_radar {
+	struct qlink_event ehdr;
+	struct qlink_chandef chan;
+	u8 event;
+	u8 rsvd[3];
+} __packed;
+
+/**
+ * struct qlink_event_external_auth - data for QLINK_EVENT_EXTERNAL_AUTH event
+ *
+ * @ssid: SSID announced by BSS
+ * @ssid_len: SSID length
+ * @bssid: BSSID of the BSS to connect to
+ * @akm_suite: AKM suite for external authentication
+ * @action: action type/trigger for external authentication
+ */
+struct qlink_event_external_auth {
+	struct qlink_event ehdr;
+	u8 ssid[IEEE80211_MAX_SSID_LEN];
+	u8 ssid_len;
+	u8 bssid[ETH_ALEN];
+	__le32 akm_suite;
+	u8 action;
 } __packed;
 
 /* QLINK TLVs (Type-Length Values) definitions
