@@ -20,6 +20,20 @@
 #include <linux/ieee80211.h>
 
 #define QLINK_PROTO_VER		5
+#define QLINK_PROTO_VER_MAJOR_M		0xFFFF
+#define QLINK_PROTO_VER_MAJOR_S		16
+#define QLINK_PROTO_VER_MINOR_M		0xFFFF
+#define QLINK_VER_MINOR(_ver)	((_ver) & QLINK_PROTO_VER_MINOR_M)
+#define QLINK_VER_MAJOR(_ver)	\
+	(((_ver) >> QLINK_PROTO_VER_MAJOR_S) & QLINK_PROTO_VER_MAJOR_M)
+#define QLINK_VER(_maj, _min)	(((_maj) << QLINK_PROTO_VER_MAJOR_S) | (_min))
+
+#define QLINK_PROTO_VER_MAJOR		18
+#define QLINK_PROTO_VER_MINOR		1
+#define QLINK_PROTO_VER		\
+	QLINK_VER(QLINK_PROTO_VER_MAJOR, QLINK_PROTO_VER_MINOR)
+
+#define QLINK_ALIGN	4
 
 #define QLINK_MACID_RSVD		0xFF
 #define QLINK_VIFID_RSVD		0xFF
@@ -180,6 +194,8 @@ enum qlink_cmd_type {
 	QLINK_CMD_PM_SET		= 0x0062,
 	QLINK_CMD_WOWLAN_SET		= 0x0063,
 	QLINK_CMD_EXTERNAL_AUTH		= 0x0066,
+	QLINK_CMD_TXPWR			= 0x0067,
+	QLINK_CMD_UPDATE_OWE		= 0x0068,
 };
 
 /**
@@ -531,6 +547,20 @@ struct qlink_cmd_chan_switch {
 	u8 beacon_count;
 } __packed;
 
+/**
+ * struct qlink_cmd_update_owe - data for QLINK_CMD_UPDATE_OWE_INFO command
+ *
+ * @peer: MAC of the peer device for which OWE processing has been completed
+ * @status: OWE external processing status code
+ * @ies: IEs for the peer constructed by the user space
+ */
+struct qlink_cmd_update_owe {
+	struct qlink_cmd chdr;
+	u8 peer[ETH_ALEN];
+	__le16 status;
+	u8 ies[0];
+} __packed;
+
 /* QLINK Command Responses messages related definitions
  */
 
@@ -719,6 +749,8 @@ enum qlink_event_type {
 	QLINK_EVENT_FREQ_CHANGE		= 0x0028,
 	QLINK_EVENT_RADAR		= 0x0029,
 	QLINK_EVENT_EXTERNAL_AUTH	= 0x0030,
+	QLINK_EVENT_MIC_FAILURE		= 0x0031,
+	QLINK_EVENT_UPDATE_OWE		= 0x0032,
 };
 
 /**
@@ -914,6 +946,33 @@ struct qlink_event_external_auth {
 	u8 bssid[ETH_ALEN];
 	__le32 akm_suite;
 	u8 action;
+} __packed;
+
+/**
+ * struct qlink_event_mic_failure - data for QLINK_EVENT_MIC_FAILURE event
+ *
+ * @src: source MAC address of the frame
+ * @key_index: index of the key being reported
+ * @pairwise: whether the key is pairwise or group
+ */
+struct qlink_event_mic_failure {
+	struct qlink_event ehdr;
+	u8 src[ETH_ALEN];
+	u8 key_index;
+	u8 pairwise;
+} __packed;
+
+/**
+ * struct qlink_event_update_owe - data for QLINK_EVENT_UPDATE_OWE event
+ *
+ * @peer: MAC addr of the peer device for which OWE processing needs to be done
+ * @ies: IEs from the peer
+ */
+struct qlink_event_update_owe {
+	struct qlink_event ehdr;
+	u8 peer[ETH_ALEN];
+	u8 rsvd[2];
+	u8 ies[0];
 } __packed;
 
 /* QLINK TLVs (Type-Length Values) definitions

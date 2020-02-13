@@ -77,5 +77,20 @@ int qtnf_cmd_get_chan_stats(struct qtnf_wmac *mac, u16 channel,
 			    struct qtnf_chan_stats *stats);
 int qtnf_cmd_send_chan_switch(struct qtnf_wmac *mac,
 			      struct cfg80211_csa_settings *params);
+int qtnf_cmd_get_channel(struct qtnf_vif *vif, struct cfg80211_chan_def *chdef);
+int qtnf_cmd_start_cac(const struct qtnf_vif *vif,
+		       const struct cfg80211_chan_def *chdef,
+		       u32 cac_time_ms);
+int qtnf_cmd_set_mac_acl(const struct qtnf_vif *vif,
+			 const struct cfg80211_acl_data *params);
+int qtnf_cmd_send_pm_set(const struct qtnf_vif *vif, u8 pm_mode, int timeout);
+int qtnf_cmd_get_tx_power(const struct qtnf_vif *vif, int *dbm);
+int qtnf_cmd_set_tx_power(const struct qtnf_vif *vif,
+			  enum nl80211_tx_power_setting type, int mbm);
+int qtnf_cmd_send_wowlan_set(const struct qtnf_vif *vif,
+			     const struct cfg80211_wowlan *wowl);
+int qtnf_cmd_netdev_changeupper(const struct qtnf_vif *vif, int br_domain);
+int qtnf_cmd_send_update_owe(struct qtnf_vif *vif,
+			     struct cfg80211_update_owe_info *owe);
 
 #endif /* QLINK_COMMANDS_H_ */

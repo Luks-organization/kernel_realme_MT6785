@@ -921,6 +921,177 @@ static int qtnf_channel_switch(struct wiphy *wiphy, struct net_device *dev,
 	return ret;
 }
 
+static int qtnf_start_radar_detection(struct wiphy *wiphy,
+				      struct net_device *ndev,
+				      struct cfg80211_chan_def *chandef,
+				      u32 cac_time_ms)
+{
+	struct qtnf_vif *vif = qtnf_netdev_get_priv(ndev);
+	int ret;
+
+	if (wiphy_ext_feature_isset(wiphy, NL80211_EXT_FEATURE_DFS_OFFLOAD))
+		return -ENOTSUPP;
+
+	ret = qtnf_cmd_start_cac(vif, chandef, cac_time_ms);
+	if (ret)
+		pr_err("%s: failed to start CAC ret=%d\n", ndev->name, ret);
+
+	return ret;
+}
+
+static int qtnf_set_mac_acl(struct wiphy *wiphy,
+			    struct net_device *dev,
+			    const struct cfg80211_acl_data *params)
+{
+	struct qtnf_vif *vif = qtnf_netdev_get_priv(dev);
+	int ret;
+
+	ret = qtnf_cmd_set_mac_acl(vif, params);
+	if (ret)
+		pr_err("%s: failed to set mac ACL ret=%d\n", dev->name, ret);
+
+	return ret;
+}
+
+static int qtnf_set_power_mgmt(struct wiphy *wiphy, struct net_device *dev,
+			       bool enabled, int timeout)
+{
+	struct qtnf_vif *vif = qtnf_netdev_get_priv(dev);
+	int ret;
+
+	ret = qtnf_cmd_send_pm_set(vif, enabled ? QLINK_PM_AUTO_STANDBY :
+				   QLINK_PM_OFF, timeout);
+	if (ret)
+		pr_err("%s: failed to set PM mode ret=%d\n", dev->name, ret);
+
+	return ret;
+}
+
+static int qtnf_get_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev,
+			     int *dbm)
+{
+	struct qtnf_vif *vif = qtnf_netdev_get_priv(wdev->netdev);
+	int ret;
+
+	ret = qtnf_cmd_get_tx_power(vif, dbm);
+	if (ret)
+		pr_err("MAC%u: failed to get Tx power\n", vif->mac->macid);
+
+	return ret;
+}
+
+static int qtnf_set_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev,
+			     enum nl80211_tx_power_setting type, int mbm)
+{
+	struct qtnf_vif *vif;
+	int ret;
+
+	if (wdev) {
+		vif = qtnf_netdev_get_priv(wdev->netdev);
+	} else {
+		struct qtnf_wmac *mac = wiphy_priv(wiphy);
+
+		vif = qtnf_mac_get_base_vif(mac);
+		if (!vif) {
+			pr_err("MAC%u: primary VIF is not configured\n",
+			       mac->macid);
+			return -EFAULT;
+		}
+	}
+
+	ret = qtnf_cmd_set_tx_power(vif, type, mbm);
+	if (ret)
+		pr_err("MAC%u: failed to set Tx power\n", vif->mac->macid);
+
+	return ret;
+}
+
+static int qtnf_update_owe_info(struct wiphy *wiphy, struct net_device *dev,
+				struct cfg80211_update_owe_info *owe_info)
+{
+	struct qtnf_vif *vif = qtnf_netdev_get_priv(dev);
+	int ret;
+
+	if (vif->wdev.iftype != NL80211_IFTYPE_AP)
+		return -EOPNOTSUPP;
+
+	ret = qtnf_cmd_send_update_owe(vif, owe_info);
+	if (ret) {
+		pr_err("VIF%u.%u: failed to update owe info\n",
+		       vif->mac->macid, vif->vifid);
+		goto out;
+	}
+
+out:
+	return ret;
+}
+
+#ifdef CONFIG_PM
+static int qtnf_suspend(struct wiphy *wiphy, struct cfg80211_wowlan *wowlan)
+{
+	struct qtnf_wmac *mac = wiphy_priv(wiphy);
+	struct qtnf_vif *vif;
+	int ret = 0;
+
+	vif = qtnf_mac_get_base_vif(mac);
+	if (!vif) {
+		pr_err("MAC%u: primary VIF is not configured\n", mac->macid);
+		ret = -EFAULT;
+		goto exit;
+	}
+
+	if (!wowlan) {
+		pr_debug("WoWLAN triggers are not enabled\n");
+		qtnf_virtual_intf_cleanup(vif->netdev);
+		goto exit;
+	}
+
+	qtnf_scan_done(vif->mac, true);
+
+	ret = qtnf_cmd_send_wowlan_set(vif, wowlan);
+	if (ret) {
+		pr_err("MAC%u: failed to set WoWLAN triggers\n",
+		       mac->macid);
+		goto exit;
+	}
+
+exit:
+	return ret;
+}
+
+static int qtnf_resume(struct wiphy *wiphy)
+{
+	struct qtnf_wmac *mac = wiphy_priv(wiphy);
+	struct qtnf_vif *vif;
+	int ret = 0;
+
+	vif = qtnf_mac_get_base_vif(mac);
+	if (!vif) {
+		pr_err("MAC%u: primary VIF is not configured\n", mac->macid);
+		ret = -EFAULT;
+		goto exit;
+	}
+
+	ret = qtnf_cmd_send_wowlan_set(vif, NULL);
+	if (ret) {
+		pr_err("MAC%u: failed to reset WoWLAN triggers\n",
+		       mac->macid);
+		goto exit;
+	}
+
+exit:
+	return ret;
+}
+
+static void qtnf_set_wakeup(struct wiphy *wiphy, bool enabled)
+{
+	struct qtnf_wmac *mac = wiphy_priv(wiphy);
+	struct qtnf_bus *bus = mac->bus;
+
+	device_set_wakeup_enable(bus->dev, enabled);
+}
+#endif
+
 static struct cfg80211_ops qtn_cfg80211_ops = {
 	.add_virtual_intf	= qtnf_add_virtual_intf,
 	.change_virtual_intf	= qtnf_change_virtual_intf,
@@ -945,7 +1116,18 @@ static struct cfg80211_ops qtn_cfg80211_ops = {
 	.disconnect		= qtnf_disconnect,
 	.dump_survey		= qtnf_dump_survey,
 	.get_channel		= qtnf_get_channel,
-	.channel_switch		= qtnf_channel_switch
+	.channel_switch		= qtnf_channel_switch,
+	.start_radar_detection	= qtnf_start_radar_detection,
+	.set_mac_acl		= qtnf_set_mac_acl,
+	.set_power_mgmt		= qtnf_set_power_mgmt,
+	.get_tx_power		= qtnf_get_tx_power,
+	.set_tx_power		= qtnf_set_tx_power,
+	.update_owe_info	= qtnf_update_owe_info,
+#ifdef CONFIG_PM
+	.suspend		= qtnf_suspend,
+	.resume			= qtnf_resume,
+	.set_wakeup		= qtnf_set_wakeup,
+#endif
 };
 
 static void qtnf_cfg80211_reg_notifier(struct wiphy *wiphy_in,
