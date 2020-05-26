@@ -1369,7 +1369,6 @@ extern void flush_smp_call_function_from_idle(void);
 #else /* !CONFIG_SMP: */
 static inline void flush_smp_call_function_from_idle(void) { }
 static inline void sched_ttwu_pending(void) { }
-
 #endif
 
 #include "stats.h"
