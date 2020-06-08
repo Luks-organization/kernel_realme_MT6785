@@ -646,6 +646,84 @@ void amdgpu_gart_location(struct amdgpu_device *adev, struct amdgpu_mc *mc)
 			mc->gart_size >> 20, mc->gart_start, mc->gart_end);
 }
 
+/**
+ * amdgpu_device_resize_fb_bar - try to resize FB BAR
+ *
+ * @adev: amdgpu_device pointer
+ *
+ * Try to resize FB BAR to make all VRAM CPU accessible. We try very hard not
+ * to fail, but if any of the BARs is not accessible after the size we abort
+ * driver loading by returning -ENODEV.
+ */
+int amdgpu_device_resize_fb_bar(struct amdgpu_device *adev)
+{
+	u64 space_needed = roundup_pow_of_two(adev->gmc.real_vram_size);
+	u32 rbar_size = order_base_2(((space_needed >> 20) | 1)) - 1;
+	struct pci_bus *root;
+	struct resource *res;
+	unsigned i;
+	u16 cmd;
+	int r;
+
+	if (!IS_ENABLED(CONFIG_PHYS_ADDR_T_64BIT))
+		return 0;
+
+	/* Bypass for VF */
+	if (amdgpu_sriov_vf(adev))
+		return 0;
+
+	/* skip if the bios has already enabled large BAR */
+	if (adev->gmc.real_vram_size &&
+	    (pci_resource_len(adev->pdev, 0) >= adev->gmc.real_vram_size))
+		return 0;
+
+	/* Check if the root BUS has 64bit memory resources */
+	root = adev->pdev->bus;
+	while (root->parent)
+		root = root->parent;
+
+	pci_bus_for_each_resource(root, res, i) {
+		if (res && res->flags & (IORESOURCE_MEM | IORESOURCE_MEM_64) &&
+		    res->start > 0x100000000ull)
+			break;
+	}
+
+	/* Trying to resize is pointless without a root hub window above 4GB */
+	if (!res)
+		return 0;
+
+	/* Disable memory decoding while we change the BAR addresses and size */
+	pci_read_config_word(adev->pdev, PCI_COMMAND, &cmd);
+	pci_write_config_word(adev->pdev, PCI_COMMAND,
+			      cmd & ~PCI_COMMAND_MEMORY);
+
+	/* Free the VRAM and doorbell BAR, we most likely need to move both. */
+	amdgpu_device_doorbell_fini(adev);
+	if (adev->asic_type >= CHIP_BONAIRE)
+		pci_release_resource(adev->pdev, 2);
+
+	pci_release_resource(adev->pdev, 0);
+
+	r = pci_resize_resource(adev->pdev, 0, rbar_size);
+	if (r == -ENOSPC)
+		DRM_INFO("Not enough PCI address space for a large BAR.");
+	else if (r && r != -ENOTSUPP)
+		DRM_ERROR("Problem resizing BAR0 (%d).", r);
+
+	pci_assign_unassigned_bus_resources(adev->pdev->bus);
+
+	/* When the doorbell or fb BAR isn't available we have no chance of
+	 * using the device.
+	 */
+	r = amdgpu_device_doorbell_init(adev);
+	if (r || (pci_resource_flags(adev->pdev, 0) & IORESOURCE_UNSET))
+		return -ENODEV;
+
+	pci_write_config_word(adev->pdev, PCI_COMMAND, cmd);
+
+	return 0;
+}
+
 /*
  * GPU helpers function.
  */
