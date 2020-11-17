@@ -815,11 +815,6 @@ config HAVE_MOVE_PUD
 	  PUD level. If there are only 3 page table levels, the move effectively
 	  happens at the PGD level.
 
-config HAVE_MOVE_PMD
-	bool
-	help
-	  Archs that select this are able to move page tables at the PMD level.
-
 config HAVE_ARCH_TRANSPARENT_HUGEPAGE
 	bool
 
