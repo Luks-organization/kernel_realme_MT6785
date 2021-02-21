@@ -1005,8 +1005,9 @@ static ssize_t devkmsg_write(struct kiocb *iocb, struct iov_iter *from)
 			endp++;
 			len -= endp - line;
 			line = endp;
-			if (strstr(line, "logd"))
-				return ret;
+			/* Only allow init: messages in the dmesg */
+			if (strncmp(line, "init:", strlen("init:")))
+				goto free;			
 		}
 	}
 
