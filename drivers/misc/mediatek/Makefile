@@ -14,7 +14,6 @@
 #$(call all-subdir-src-or-makefile)
 export MTK_PLATFORM_NAME := $(CONFIG_MTK_PLATFORM)
 export MTK_PLATFORM := $(subst ",,$(CONFIG_MTK_PLATFORM))
-subdir-ccflags-y += -Werror
 
 #sunyunpeng@WT.CAM.DRV, 2022/03/17, Add for moss sois+eis
 ifeq ($(CONFIG_MTK_PLATFORM), "mt6853")
