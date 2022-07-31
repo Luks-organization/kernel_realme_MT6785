@@ -621,6 +621,11 @@ enum {
 /* number of extent info in extent cache we try to shrink */
 #define EXTENT_CACHE_SHRINK_NUMBER	128
 
+#define RECOVERY_MAX_RA_BLOCKS		BIO_MAX_PAGES
+#define RECOVERY_MIN_RA_BLOCKS		1
+
+#define F2FS_ONSTACK_PAGES	16	/* nr of onstack pages */
+
 struct rb_entry {
 	struct rb_node rb_node;		/* rb node located in rb-tree */
 	unsigned int ofs;		/* start offset of the entry */
@@ -3868,6 +3873,9 @@ void f2fs_destroy_compress_mempool(void);
 void f2fs_decompress_pages(struct bio *bio, struct page *page, bool verity);
 bool f2fs_cluster_is_empty(struct compress_ctx *cc);
 bool f2fs_cluster_can_merge_page(struct compress_ctx *cc, pgoff_t index);
+bool f2fs_all_cluster_page_ready(struct compress_ctx *cc, struct page **pages,
+				int index, int nr_pages, bool uptodate);
+bool f2fs_sanity_check_cluster(struct dnode_of_data *dn);
 void f2fs_compress_ctx_add_page(struct compress_ctx *cc, struct page *page);
 int f2fs_write_multi_pages(struct compress_ctx *cc,
 						int *submitted,
