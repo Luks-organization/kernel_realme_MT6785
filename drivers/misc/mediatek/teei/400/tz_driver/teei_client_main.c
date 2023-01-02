@@ -1147,7 +1147,6 @@ static int teei_client_init(void)
 	IMSG_DEBUG("create the sub_thread successfully!\n");
 */
 
-
 	teei_config_init();
 
 	goto return_fn;
