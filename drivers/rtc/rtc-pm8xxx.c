@@ -651,6 +651,13 @@ static const struct dev_pm_ops pm8xxx_rtc_pm_ops = {
 	.resume = pm8xxx_rtc_resume,
 };
 
+static void pm8xxx_rtc_shutdown(struct platform_device *pdev)
+{
+	struct pm8xxx_rtc *rtc_dd = platform_get_drvdata(pdev);
+
+	devm_free_irq(rtc_dd->rtc_dev, rtc_dd->rtc_alarm_irq, rtc_dd);
+}
+
 static struct platform_driver pm8xxx_rtc_driver = {
 	.probe		= pm8xxx_rtc_probe,
 	.driver	= {
@@ -658,6 +665,7 @@ static struct platform_driver pm8xxx_rtc_driver = {
 		.pm		= &pm8xxx_rtc_pm_ops,
 		.of_match_table	= pm8xxx_id_table,
 	},
+	.shutdown	= pm8xxx_rtc_shutdown,
 };
 
 module_platform_driver(pm8xxx_rtc_driver);
