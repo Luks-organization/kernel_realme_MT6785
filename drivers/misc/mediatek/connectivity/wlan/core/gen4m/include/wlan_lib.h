@@ -214,15 +214,8 @@
 #define WLAN_CFG_KEY_LEN_MAX	32	/* include \x00  EOL */
 #define WLAN_CFG_VALUE_LEN_MAX	128	/* include \x00 EOL */
 #define WLAN_CFG_FLAG_SKIP_CB	BIT(0)
-//#ifdef VENDOR_EDIT
-/* Guotian.Wu@CONNECTIVITY.WIFI.BASIC.Crash.336013 2020/08/31 modify for memory out of bounds */
-//#define WLAN_CFG_FILE_BUF_SIZE	2048
-//#else
-#define WLAN_CFG_FILE_BUF_SIZE	4096
-//#endif
-
+#define WLAN_CFG_FILE_BUF_SIZE	8192
 #define WLAN_CFG_REC_ENTRY_NUM_MAX 400
-
 
 
 #define WLAN_CFG_SET_CHIP_LEN_MAX 10
