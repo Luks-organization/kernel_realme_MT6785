@@ -280,6 +280,21 @@ config MTK_ANDROID_DEFAULT_SETTING
 	select NETFILTER_XT_MATCH_ESP
 	select PGTABLE_MAPPING if ZSMALLOC && (ARM || ARM64)
 	select SPECULATIVE_PAGE_FAULT if (ARCH_SUPPORTS_SPECULATIVE_PAGE_FAULT && ARCH_HAS_PTE_SPECIAL && MMU && SMP)
+	select STP
+	select SYNC
+	select POWER_RESET
+	select SYSCON_REBOOT_MODE
+	select TMPFS
+	select USB_CONFIGFS_F_MTP
+	select USB_CONFIGFS_F_PTP
+	select WEXT_PRIV
+	select WEXT_PROC
+	select WIRELESS
+	select WIRELESS_EXT
+	select XFRM
+	select XFRM_ALGO
+	select XFRM_IPCOMP
+	select XFRM_SUB_POLICY
 	select MTK_SOCINFO
 	help
 	  Select the MTK android config by default
