@@ -101,7 +101,6 @@
 #define CON_CTRL_FLD_REG_DUAL_EN REG_FLD_MSB_LSB(4, 4)
 #define DSI_CM_WAIT_FIFO_FULL_EN BIT(27)
 
-<<<<<<< HEAD
 #define DSI_MODE_CTRL 0x14
 #define MODE (3)
 #define CMD_MODE 0
