@@ -1963,10 +1963,20 @@ void __init init_mm_internals(void)
 	start_shepherd_timer();
 #endif
 #ifdef CONFIG_PROC_FS
+	if (!IS_ENABLED(CONFIG_PROC_STRIPPED)) {
 	proc_create("buddyinfo", 0444, NULL, &buddyinfo_file_operations);
 	proc_create("pagetypeinfo", 0400, NULL, &pagetypeinfo_file_operations);
-	proc_create("vmstat", 0444, NULL, &vmstat_file_operations);
 	proc_create("zoneinfo", 0444, NULL, &zoneinfo_file_operations);
+	}
+	proc_create("vmstat", 0444, NULL, &vmstat_file_operations);
+#if defined(OPLUS_FEATURE_MULTI_FREEAREA) && defined(CONFIG_PHYSICAL_ANTI_FRAGMENTATION)
+//Peifeng.Li@PSW.Kernel.BSP.Memory, 2020/04/22, multi-freearea
+    pentry = proc_create("free_area_list_show", S_IRWXUGO, NULL, &proc_free_area_fops);
+    if (!pentry) {
+		pr_err("vmstat: failed to create '/proc/free_area_list_show'\n");
+        return;
+    }
+#endif
 #endif
 }
 
