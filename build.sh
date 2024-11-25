@@ -6,8 +6,8 @@ export LC_ALL=C && export USE_CCACHE=1
 ccache -M 25G
 TANGGAL=$(date +"%Y%m%d-%H")
 export ARCH=arm64
-export KBUILD_BUILD_HOST=linux-build
-export KBUILD_BUILD_USER="stim"
+export KBUILD_BUILD_HOST=android-build
+export KBUILD_BUILD_USER="Luks"
 clangbin=clang/bin/clang
 if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/kei-space/clang/r522817.git clang
 fi
@@ -46,7 +46,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Lineage-RM6785-${TANGGAL}.zip *
+zip -r9 psionic-salaa-${TANGGAL}.zip *
 cd ../
 fi
 }
