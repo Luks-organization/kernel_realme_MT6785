@@ -36,6 +36,15 @@
 #define USB_HWDESC_HEADER_LEN			32
 #define CRCLENGTH				4
 
+enum rtl92d_RX_DESC_ENC {
+	RX_DESC_ENC_NONE	= 0,
+	RX_DESC_ENC_WEP40	= 1,
+	RX_DESC_ENC_TKIP_WO_MIC	= 2,
+	RX_DESC_ENC_TKIP_MIC	= 3,
+	RX_DESC_ENC_AES		= 4,
+	RX_DESC_ENC_WEP104	= 5,
+};
+
 /* Define a macro that takes a le32 word, converts it to host ordering,
  * right shifts by a specified count, creates a mask of the specified
  * bit count, and extracts that number of bits.
@@ -428,6 +437,8 @@
 	SHIFT_AND_MASK_LE(__pdesc, 15, 1)
 #define GET_RX_DESC_DRV_INFO_SIZE(__pdesc)		\
 	SHIFT_AND_MASK_LE(__pdesc, 16, 4)
+#define GET_RX_DESC_ENC_TYPE(__pdesc)                   \
+	SHIFT_AND_MASK_LE(__pdesc, 22, 20)
 #define GET_RX_DESC_SECURITY(__pdesc)			\
 	SHIFT_AND_MASK_LE(__pdesc, 20, 3)
 #define GET_RX_DESC_QOS(__pdesc)			\

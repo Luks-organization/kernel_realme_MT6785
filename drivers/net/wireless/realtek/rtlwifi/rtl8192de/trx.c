@@ -487,7 +487,8 @@ bool rtl92de_rx_query_desc(struct ieee80211_hw *hw,	struct rtl_stats *stats,
 	stats->icv = (u16) GET_RX_DESC_ICV(pdesc);
 	stats->crc = (u16) GET_RX_DESC_CRC32(pdesc);
 	stats->hwerror = (stats->crc | stats->icv);
-	stats->decrypted = !GET_RX_DESC_SWDEC(pdesc);
+	stats->decrypted = !GET_RX_DESC_SWDEC(pdesc) &&
+			   GET_RX_DESC_ENC_TYPE(pdesc) != RX_DESC_ENC_NONE;
 	stats->rate = (u8) GET_RX_DESC_RXMCS(pdesc);
 	stats->shortpreamble = (u16) GET_RX_DESC_SPLCP(pdesc);
 	stats->isampdu = (bool) (GET_RX_DESC_PAGGR(pdesc) == 1);
@@ -500,8 +501,6 @@ bool rtl92de_rx_query_desc(struct ieee80211_hw *hw,	struct rtl_stats *stats,
 	rx_status->band = hw->conf.chandef.chan->band;
 	if (GET_RX_DESC_CRC32(pdesc))
 		rx_status->flag |= RX_FLAG_FAILED_FCS_CRC;
-	if (!GET_RX_DESC_SWDEC(pdesc))
-		rx_status->flag |= RX_FLAG_DECRYPTED;
 	if (GET_RX_DESC_BW(pdesc))
 		rx_status->bw = RATE_INFO_BW_40;
 	if (GET_RX_DESC_RXHT(pdesc))
