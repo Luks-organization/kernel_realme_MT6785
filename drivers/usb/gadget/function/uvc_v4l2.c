@@ -41,9 +41,30 @@ uvc_send_response(struct uvc_device *uvc, struct uvc_request_data *data)
 	if (data->length < 0)
 		return usb_ep_set_halt(cdev->gadget->ep0);
 
+	/*
+	 * For control OUT transfers the request has been enqueued synchronously
+	 * by the setup handler, we just need to tell the UDC whether to ACK or
+	 * STALL the control transfer.
+	 */
+	if (uvc->event_setup_out) {
+		/*
+		 * The length field carries the control request status.
+		 * Negative values signal a STALL and zero values an ACK.
+		 * Positive values are only supported for backwards compatibility.
+		 * No data is actually sent back in the status stage.
+		 */
+		req->length = 0;
+		req->zero = 0;
+		req->explicit_status = 1;
+
+		uvc->event_status = 1;
+		return usb_ep_queue(cdev->gadget->ep0, req, GFP_KERNEL);
+	}
+
 	req->length = min_t(unsigned int, uvc->event_length, data->length);
 	req->zero = data->length < uvc->event_length;
-
+	req->explicit_status = 0;
+	
 	memcpy(req->buf, data->data, req->length);
 
 	return usb_ep_queue(cdev->gadget->ep0, req, GFP_KERNEL);
@@ -228,6 +249,33 @@ uvc_v4l2_streamoff(struct file *file, void *fh, enum v4l2_buf_type type)
 	return uvcg_video_enable(video, 0);
 }
 
+static void
+uvc_v4l2_event_merge(const struct v4l2_event *old, struct v4l2_event *new) {
+	/*
+	 * The only purpose of this callback is to inform the user why
+	 * some events are dropped. It does not make sense to actually
+	 * merge any callbacks for UVC, the queue size should be
+	 * increased if this is hit.
+	 */
+	pr_err("uvc gadget: dropping event due to insufficient queue size!");
+}
+
+static void
+uvc_v4l2_event_replace(struct v4l2_event *old, const struct v4l2_event *new) {
+	/*
+	 * The only purpose of this callback is to inform the user why
+	 * some events are dropped. It does not make sense to actually
+	 * replace any callbacks for UVC, the queue size should be
+	 * increased if this is hit.
+	 */
+	pr_err("uvc gadget: dropping event due to insufficient queue size!");
+}
+
+static const struct v4l2_subscribed_event_ops uvc_v4l2_event_ch_ops = {
+	.merge = uvc_v4l2_event_merge,
+	.replace = uvc_v4l2_event_replace,
+};
+
 static int
 uvc_v4l2_subscribe_event(struct v4l2_fh *fh,
 			 const struct v4l2_event_subscription *sub)
@@ -235,7 +283,7 @@ uvc_v4l2_subscribe_event(struct v4l2_fh *fh,
 	if (sub->type < UVC_EVENT_FIRST || sub->type > UVC_EVENT_LAST)
 		return -EINVAL;
 
-	return v4l2_event_subscribe(fh, sub, 2, NULL);
+	return v4l2_event_subscribe(fh, sub, 10, &uvc_v4l2_event_ch_ops);
 }
 
 static int
