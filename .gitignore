@@ -125,21 +125,9 @@ all.config
 # fetched Android config fragments
 kernel/configs/android-*.cfg
 
-<<<<<<< HEAD
-# Build
-AnyKernel/
-clang/
-gcc32/
-gcc64/
-out/
-=======
 #
 #Ignoring Android.bp link file
 #
 Android.bp
-<<<<<<< HEAD
 
 *.orig
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
-=======
->>>>>>> parent of eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
