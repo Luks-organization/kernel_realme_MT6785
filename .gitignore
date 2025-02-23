@@ -125,9 +125,18 @@ all.config
 # fetched Android config fragments
 kernel/configs/android-*.cfg
 
+<<<<<<< HEAD
 # Build
 AnyKernel/
 clang/
 gcc32/
 gcc64/
 out/
+=======
+#
+#Ignoring Android.bp link file
+#
+Android.bp
+
+*.orig
+>>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
