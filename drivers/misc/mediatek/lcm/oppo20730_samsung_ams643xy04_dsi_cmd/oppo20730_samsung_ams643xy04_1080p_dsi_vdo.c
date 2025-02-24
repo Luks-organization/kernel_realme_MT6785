@@ -151,6 +151,7 @@ static struct dsi_debug debug_read;
 extern unsigned int esd_recovery_backlight_level;
 extern unsigned int islcmconnected;
 
+unsigned int real_backlight_level = 0;
 static unsigned int hbm_mode_backlight_level = 2;
 static bool aod_in = false;
 static bool aod_state = false;
@@ -2020,6 +2021,8 @@ static void lcm_setbrightness(void *handle, unsigned int level)
 		push_table22(handle, lcm_setbrightness_normal,
 			sizeof(lcm_setbrightness_normal)/sizeof(lcm_setbrightness_normal[0]), 1);
 	}
+	
+	real_backlight_level = level;	
 }
 
 
