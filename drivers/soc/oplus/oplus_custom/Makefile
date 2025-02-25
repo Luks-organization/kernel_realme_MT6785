@@ -1,3 +1,4 @@
 #include $(srctree)/drivers/misc/mediatek/Makefile.custom
 
-obj-y += oplus_custom.o
+obj-$(CONFIG_OPLUS_FEATURE_CUSTOM) += oplus_custom.o
+

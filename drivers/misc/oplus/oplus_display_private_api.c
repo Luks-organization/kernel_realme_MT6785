@@ -559,7 +559,7 @@ int oplus_display_panel_get_brightness(void *buf)
 		brightness = LED_OFF;
 	}
 
-	*brightness = brightness;
+	*oplus_brightness = brightness;
 
 	return 0;
 }

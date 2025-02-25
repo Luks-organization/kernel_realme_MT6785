@@ -17,6 +17,8 @@ source "drivers/soc/ti/Kconfig"
 source "drivers/soc/ux500/Kconfig"
 source "drivers/soc/versatile/Kconfig"
 source "drivers/soc/zte/Kconfig"
+source "drivers/soc/oplus/oplus_als_cali_value/Kconfig"
+source "drivers/soc/oplus/oplus_custom/Kconfig"
 
 #ifdef OPLUS_BUG_STABILITY
 source "drivers/soc/oplus/system/Kconfig"
@@ -26,7 +28,5 @@ source "drivers/soc/oplus/system/Kconfig"
 #Qicai.gu  12:00, 2020/06/03  devi info
 source "drivers/soc/oplus/device_info/Kconfig"
 ##endif /* OPLUS_FEATURE_TP_BASIC */
-
-source "drivers/soc/oplus/oplus_als_cali_value/Kconfig"
 
 endmenu

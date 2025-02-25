@@ -35,7 +35,7 @@ obj-y +=   oplus/device_info/
 ##endif /* OPLUS_FEATURE_TP_BASIC */
 
 #ifdef OPLUS_BUG_STABILITY
-obj-y +=  oplus/oplus_custom/
+obj-$(CONFIG_OPLUS_FEATURE_CUSTOM)   +=  oplus/oplus_custom/
 #endif /* OPLUS_BUG_STABILITY */
 
 # ifdef OPLUS_FEATURE_SENSOR 
