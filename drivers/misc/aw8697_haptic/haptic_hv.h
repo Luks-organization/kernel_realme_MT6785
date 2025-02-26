@@ -786,6 +786,8 @@ struct aw_haptic {
 	int amplitude;
 	int reset_gpio;
 	int device_id;
+/* Add audio_delay for audio & vibrator sync */
+	int audio_delay;
 	int pre_haptic_number;
 
 
@@ -824,7 +826,8 @@ struct aw_haptic {
 	struct mutex qos_lock;
 	struct mutex rtp_lock;
 	struct hrtimer timer;
-	struct work_struct rtp_work;
+/* Modify rtp_work for audio & vibrator sync */
+	struct delayed_work rtp_work;
 	struct work_struct rtp_single_cycle_work;
 	struct work_struct rtp_regroup_work;
 	struct delayed_work ram_work;

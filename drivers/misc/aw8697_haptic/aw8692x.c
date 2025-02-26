@@ -1564,6 +1564,10 @@ static void aw8692x_misc_para_init(struct aw_haptic *aw_haptic)
 		    reg_array, AW_I2C_BYTE_EIGHT);
 	aw_haptic->index = reg_array[0];
 	memcpy(aw_haptic->seq, reg_array, AW_SEQUENCER_SIZE);
+	/* Set gain_bypass */
+	i2c_w_bits(aw_haptic, AW8692X_REG_SYSCTRL4,
+		    AW8692X_BIT_SYSCTRL4_GAIN_BYPASS_MASK,
+		    AW8692X_BIT_SYSCTRL4_GAIN_BYPASS_MASK_ENABLE);
 	aw8692x_tm_config(aw_haptic, AW_UNLOCK);
 	/*LRA trim source select register*/
 	reg_val = AW8692X_REG_SYSCTRL5_INIT_VAL;
