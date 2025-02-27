@@ -50,6 +50,7 @@ enum zram_pageflags {
 	ZRAM_UNDER_WB,	/* page is under writeback */
 	ZRAM_HUGE,	/* Incompressible page */
 	ZRAM_IDLE,	/* not accessed page since last idle marking */
+
 	__NR_ZRAM_PAGEFLAGS,
 };
 
@@ -123,12 +124,6 @@ struct zram {
 #endif
 #ifdef CONFIG_ZRAM_MEMORY_TRACKING
 	struct dentry *debugfs_dir;
-#endif
-#if (defined CONFIG_ZRAM_WRITEBACK)
-	struct block_device *bdev;
-	unsigned int old_block_size;
-	unsigned long nr_pages;
-	unsigned long increase_nr_pages;
 #endif
 };
 

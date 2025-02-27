@@ -36,7 +36,6 @@
 #include <linux/cpuhotplug.h>
 
 #include "zram_drv.h"
-#include "zram_drv_internal.h"
 
 static DEFINE_IDR(zram_index_idr);
 /* idr index must be protected */
@@ -45,9 +44,6 @@ static DEFINE_MUTEX(zram_index_mutex);
 static int zram_major;
 static struct zram *zram_devices;
 static const char *default_compressor = "lz4";
-
-static bool is_lzorle;
-static unsigned char lzo_marker[4] = {0x11, 0x00, 0x00};
 
 /* Module params (documentation at end) */
 static unsigned int num_devices = 1;
@@ -67,9 +63,77 @@ static int zram_slot_trylock(struct zram *zram, u32 index)
 	return bit_spin_trylock(ZRAM_LOCK, &zram->table[index].flags);
 }
 
+static void zram_slot_lock(struct zram *zram, u32 index)
+{
+	bit_spin_lock(ZRAM_LOCK, &zram->table[index].flags);
+}
+
+static void zram_slot_unlock(struct zram *zram, u32 index)
+{
+	bit_spin_unlock(ZRAM_LOCK, &zram->table[index].flags);
+}
+
+static inline bool init_done(struct zram *zram)
+{
+	return zram ? zram->disksize : 0;
+}
+
+static inline struct zram *dev_to_zram(struct device *dev)
+{
+	return (struct zram *)dev_to_disk(dev)->private_data;
+}
+
+static unsigned long zram_get_handle(struct zram *zram, u32 index)
+{
+	return zram->table[index].handle;
+}
+
+static void zram_set_handle(struct zram *zram, u32 index, unsigned long handle)
+{
+	zram->table[index].handle = handle;
+}
+
+/* flag operations require table entry bit_spin_lock() being held */
+static bool zram_test_flag(struct zram *zram, u32 index,
+			enum zram_pageflags flag)
+{
+	return zram->table[index].flags & BIT(flag);
+}
+
+static void zram_set_flag(struct zram *zram, u32 index,
+			enum zram_pageflags flag)
+{
+	zram->table[index].flags |= BIT(flag);
+}
+
+static void zram_clear_flag(struct zram *zram, u32 index,
+			enum zram_pageflags flag)
+{
+	zram->table[index].flags &= ~BIT(flag);
+}
+
+static inline void zram_set_element(struct zram *zram, u32 index,
+			unsigned long element)
+{
+	zram->table[index].element = element;
+}
+
 static unsigned long zram_get_element(struct zram *zram, u32 index)
 {
 	return zram->table[index].element;
+}
+
+static size_t zram_get_obj_size(struct zram *zram, u32 index)
+{
+	return zram->table[index].flags & (BIT(ZRAM_FLAG_SHIFT) - 1);
+}
+
+static void zram_set_obj_size(struct zram *zram,
+					u32 index, size_t size)
+{
+	unsigned long flags = zram->table[index].flags >> ZRAM_FLAG_SHIFT;
+
+	zram->table[index].flags = (flags << ZRAM_FLAG_SHIFT) | size;
 }
 
 static inline bool zram_allocated(struct zram *zram, u32 index)
@@ -1123,12 +1187,9 @@ static void zram_free_page(struct zram *zram, size_t index)
 		atomic64_dec(&zram->stats.huge_pages);
 	}
 
-
-
 	if (zram_test_flag(zram, index, ZRAM_WB)) {
 		zram_clear_flag(zram, index, ZRAM_WB);
 		free_block_bdev(zram, zram_get_element(zram, index));
-		atomic64_dec(&zram->stats.pages_stored);
 		goto out;
 	}
 
@@ -1139,7 +1200,6 @@ static void zram_free_page(struct zram *zram, size_t index)
 	if (zram_test_flag(zram, index, ZRAM_SAME)) {
 		zram_clear_flag(zram, index, ZRAM_SAME);
 		atomic64_dec(&zram->stats.same_pages);
-		atomic64_dec(&zram->stats.pages_stored);
 		goto out;
 	}
 
@@ -1151,15 +1211,13 @@ static void zram_free_page(struct zram *zram, size_t index)
 
 	atomic64_sub(zram_get_obj_size(zram, index),
 			&zram->stats.compr_data_size);
-	atomic64_dec(&zram->stats.pages_stored);
-
 out:
+	atomic64_dec(&zram->stats.pages_stored);
 	zram_set_handle(zram, index, 0);
 	zram_set_obj_size(zram, index, 0);
 	WARN_ON_ONCE(zram->table[index].flags &
 		~(1UL << ZRAM_LOCK | 1UL << ZRAM_UNDER_WB));
 }
-
 
 static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
 				struct bio *bio, bool partial_io)
@@ -1170,7 +1228,6 @@ static int __zram_bvec_read(struct zram *zram, struct page *page, u32 index,
 	void *src, *dst;
 
 	zram_slot_lock(zram, index);
-
 	if (zram_test_flag(zram, index, ZRAM_WB)) {
 		struct bio_vec bvec;
 
@@ -1318,7 +1375,7 @@ compress_again:
 		atomic64_inc(&zram->stats.writestall);
 		handle = zs_malloc(zram->mem_pool, comp_len,
 				GFP_NOIO | __GFP_HIGHMEM |
-				__GFP_MOVABLE | GFP_ATOMIC | ___GFP_HIGH_ATOMIC_ZRAM);
+				__GFP_MOVABLE);
 		if (handle)
 			goto compress_again;
 		return -ENOMEM;
@@ -1365,7 +1422,6 @@ out:
 		zram_set_handle(zram, index, handle);
 		zram_set_obj_size(zram, index, comp_len);
 	}
-
 	zram_slot_unlock(zram, index);
 
 	/* Update stats */
@@ -2161,7 +2217,6 @@ static int __init zram_init(void)
 #ifdef CONFIG_PROC_FS
 	proc_create("zraminfo", 0644, NULL, &zraminfo_proc_fops);
 #endif
-
 
 	return 0;
 

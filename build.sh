@@ -2,8 +2,11 @@
 function compile()
 {
 source ~/.bashrc && source ~/.profile
-export LC_ALL=C && export USE_CCACHE=1
-ccache -M 25G
+export LC_ALL=C
+export USE_CCACHE=1
+export CCACHE_DIR=~/.ccache
+ccache -M 40G
+ccache -o compression=true
 TANGGAL=$(date +"%Y%m%d-%H")
 export ARCH=arm64
 export KBUILD_BUILD_HOST=android-build
@@ -17,6 +20,7 @@ fi
 gcc32bin=gcc32/bin/arm-linux-androideabi-as
 if ! [ -a $gcc32bin ]; then git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 gcc32
 fi
+rm -rf out
 rm -rf AnyKernel
 make O=out ARCH=arm64 salaa_defconfig
 PATH="${PWD}/clang/bin:${PATH}:${PWD}/gcc32/bin:${PATH}:${PWD}/gcc64/bin:${PATH}" \

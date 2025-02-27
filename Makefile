@@ -562,6 +562,10 @@ KBUILD_CPPFLAGS += -DOPLUS_FEATURE_CHG_BASIC
 CFLAGS_KERNEL +=   -DOPLUS_FEATURE_CHG_BASIC
 CFLAGS_MODULE +=   -DOPLUS_FEATURE_CHG_BASIC
 
+# Include this also for config targets because some architectures need
+# cc-cross-prefix to determine CROSS_COMPILE.
+include $(srctree)/scripts/Makefile.compiler
+
 RETPOLINE_CFLAGS_GCC := -mindirect-branch=thunk-extern -mindirect-branch-register
 RETPOLINE_VDSO_CFLAGS_GCC := -mindirect-branch=thunk-inline -mindirect-branch-register
 RETPOLINE_CFLAGS_CLANG := -mretpoline-external-thunk
