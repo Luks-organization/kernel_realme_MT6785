@@ -11,6 +11,9 @@ TANGGAL=$(date +"%Y%m%d-%H")
 export ARCH=arm64
 export KBUILD_BUILD_HOST=android-build
 export KBUILD_BUILD_USER="Luks"
+clangbin=clang/bin/clang
+if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clang.git clang
+fi	
 rm -rf out
 rm -rf AnyKernel
 make O=out ARCH=arm64 salaa_defconfig
@@ -19,14 +22,15 @@ make -j$(nproc --all) O=out \
                       ARCH=arm64 \
                       CC="clang" \
                       LLVM=1 \
+                      LLVM_IAS=1 \
                       AR=llvm-ar \
                       NM=llvm-nm \
                       STRIP=llvm-strip \
                       OBJCOPY=llvm-objcopy \
-                      OBJDUMP=llvm-objdump\
+                      OBJDUMP=llvm-objdump \
+                      LD=ld.lld \
                       CROSS_COMPILE=aarch64-linux-gnu- \
                       CROSS_COMPILE_ARM32=arm-linux-gnueabihf- \
-                      LD=ld.lld \
                       CONFIG_NO_ERROR_ON_MISMATCH=y
 }
 function zupload()
