@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 psionic-salaa-${TANGGAL}.zip *
+zip -r9 psionic-r3-salaa-${TANGGAL}.zip *
 cd ../
 fi
 }
