@@ -1483,7 +1483,7 @@ static void btusb_work(struct work_struct *work)
 			 * alternate setting.
 			 */
 			spin_lock_irqsave(&data->rxlock, flags);
-			kfree_skb(data->sco_skb);
+		        dev_kfree_skb_irq(data->sco_skb);
 			data->sco_skb = NULL;
 			spin_unlock_irqrestore(&data->rxlock, flags);
 
