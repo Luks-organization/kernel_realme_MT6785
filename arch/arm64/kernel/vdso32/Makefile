@@ -5,15 +5,15 @@
 # A mix between the arm64 and arm vDSO Makefiles.
 
 ifeq ($(cc-name),clang)
-  CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32)
-ifeq ($(ld-name),lld)
-  LD_ARM32 := $(LD)
+CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32) $(CLANG_GCC32_TC) $(CLANG_PREFIX32)
+ifneq ($(LLVM),)
+LD_ARM32 := $(LD)
 else
-  LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
+LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
 endif
 else
-  CC_ARM32 ?= $(CROSS_COMPILE_ARM32)$(cc-name)
-  LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
+CC_ARM32 ?= $(CROSS_COMPILE_ARM32)$(cc-name)
+LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
 endif
 
 ifneq ($(LLVM),)
