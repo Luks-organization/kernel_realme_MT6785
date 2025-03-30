@@ -36,7 +36,7 @@ endif
 
     # Do Nothing, move to standalone repo
     MODULE_NAME := connadp
-    obj-y += $(MODULE_NAME).o
+    obj-$(CONFIG_MTK_COMBO) += $(MODULE_NAME).o
     $(MODULE_NAME)-objs += common/connectivity_build_in_adapter.o
     $(MODULE_NAME)-objs += common/wmt_build_in_adapter.o
     $(MODULE_NAME)-objs += power_throttling/adapter.o
@@ -64,20 +64,16 @@ endif
         # Do build-in for xxx.c checking
         subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
         subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
-        obj-y += common/
-        obj-y += wlan/adaptor/
-        obj-y += wlan/core/gen4m/
-
-	# FMRadio
-	obj-$(CONFIG_MTK_FMRADIO) += fmradio/
 
     endif
 
-# Bluetooth
-obj-$(CONFIG_MTK_COMBO_BT) += bt/mt66xx/wmt/
-
-# GPS
+obj-$(CONFIG_MTK_FMRADIO) += fmradio/
+obj-$(CONFIG_MTK_BTIF) += bt/mt66xx/wmt/
 obj-$(CONFIG_MTK_COMBO_GPS) += gps/
+obj-$(CONFIG_MTK_COMBO) += common/
+obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
+obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6785) += wlan/core/gen4m/
+obj-$(CONFIG_MTK_CONNFEM) += connfem/
 
 # Otherwise we were called directly from the command line;
 # invoke the kernel build system.
