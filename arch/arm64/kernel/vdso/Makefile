@@ -21,12 +21,12 @@ ccflags-y := -fno-stack-protector
 ccflags-y += -DDISABLE_BRANCH_PROFILING -ffixed-x18
 ccflags-y += $(DISABLE_LTO)
 
-# Force -O2 to avoid libgcc dependencies
-CFLAGS_REMOVE_vgettimeofday.o = -pg -Os
-CFLAGS_vgettimeofday.o = -O2 -fPIC
-ifneq ($(cc-name),clang)
-CFLAGS_vgettimeofday.o += -mcmodel=tiny
+ifeq ($(cc-name),clang)
+CFLAGS_vgettimeofday.o = -O3
+else
+CFLAGS_vgettimeofday.o = -O2
 endif
+CFLAGS_vgettimeofday.o = -mcmodel=tiny -fasynchronous-unwind-tables
 
 CFLAGS_REMOVE_vgettimeofday.o += $(CC_FLAGS_SCS)
 

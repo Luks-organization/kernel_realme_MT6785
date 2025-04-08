@@ -747,22 +747,40 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning, int-in-bool-context)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, address-of-packed-member)
 KBUILD_CFLAGS	+= $(call cc-disable-warning, attribute-alias)
 
-ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
+ifeq ($(CONFIG_CC_OPTIMIZE_FOR_SIZE), y)
 KBUILD_CFLAGS   += -Os
-else
+KBUILD_AFLAGS   += -Os
+KBUILD_LDFLAGS  += -Os
+else ifeq ($(cc-name),clang)
 KBUILD_CFLAGS   += -O3
+KBUILD_AFLAGS   += -O3
+KBUILD_LDFLAGS  += -O3
+else
+KBUILD_CFLAGS   += -O2
+KBUILD_AFLAGS   += -O2
+KBUILD_LDFLAGS  += -O2
 endif
 
-ifdef CONFIG_LLVM_POLLY
+ifdef CONFIG_POLLY_CLANG
 KBUILD_CFLAGS	+= -mllvm -polly \
-		           -mllvm -polly-run-inliner \
-		           -mllvm -polly-reschedule=1 \
-                   -mllvm -polly-loopfusion-greedy=1 \
-                   -mllvm -polly-postopts=1 \
-		           -mllvm -polly-ast-use-context \
-		           -mllvm -polly-detect-keep-going \
-		           -mllvm -polly-vectorizer=stripmine \
-		           -mllvm -polly-invariant-load-hoisting
+ 		   -mllvm -polly-ast-use-context \
+ 		   -mllvm -polly-invariant-load-hoisting \
+ 		   -mllvm -polly-run-inliner \
+ 		   -mllvm -polly-vectorizer=stripmine
+ifeq ($(shell test $(CONFIG_CLANG_VERSION) -gt 130000; echo $$?),0)
+KBUILD_CFLAGS	+= -mllvm -polly-loopfusion-greedy=1 \
+ 		   -mllvm -polly-reschedule=1 \
+ 		   -mllvm -polly-postopts=1
+else
+KBUILD_CFLAGS	+= -mllvm -polly-isl-arg=--no-schedule-serialize-sccs
+endif
+# Polly may optimise loops with dead paths beyound what the linker
+# can understand. This may negate the effect of the linker's DCE
+# so we tell Polly to perfom proven DCE on the loops it optimises
+# in order to preserve the overall effect of the linker's DCE.
+ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
+KBUILD_CFLAGS	+= -mllvm -polly-run-dce
+endif
 endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
