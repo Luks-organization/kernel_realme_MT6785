@@ -16,7 +16,7 @@ if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clan
 fi	
 rm -rf out
 rm -rf AnyKernel
-make O=out ARCH=arm64 salaa_defconfig
+make O=out ARCH=arm64 sala_defconfig
 PATH="${PWD}/clang/bin:${PATH}" \
 make -j$(nproc --all) O=out \
                       ARCH=arm64 \
@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 psionic-r3-salaa-${TANGGAL}.zip *
+zip -r9 psionic-r3-sala-${TANGGAL}.zip *
 cd ../
 fi
 }

@@ -5,7 +5,7 @@
 compile_kernel() {
     # compile_kernel
     export ARCH=arm64
-    make O=out ARCH=arm64 salaa_defconfig
+    make O=out ARCH=arm64 sala_defconfig
 
     # Generate profile data during the first compilation
     PATH="${PWD}/clang/bin:${PWD}/arm64:${PWD}/arm32:${PATH}" \
@@ -32,8 +32,8 @@ setup_kernel_release() {
     # setup_kernel_release
     v=$(cat version)
     d=$(date "+%d%m%Y")
-    z="psionic-kernel-salaa-$d-$v.zip"
-    wget --quiet https://psionicprjkt.my.id/assets/files/AK3-salaa.zip && unzip AK3-salaa
+    z="psionic-kernel-sala-$d-$v.zip"
+    wget --quiet https://psionicprjkt.my.id/assets/files/AK3-sala.zip && unzip AK3-sala
     cp out/arch/arm64/boot/Image.gz-dtb AnyKernel && cd AnyKernel
     zip -r9 "$z" *
 }
