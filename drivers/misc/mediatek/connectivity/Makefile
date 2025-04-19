@@ -43,10 +43,10 @@ endif
     $(MODULE_NAME)-objs += power_throttling/core.o
     $(MODULE_NAME)-objs += power_throttling/test.o
 
+    # Do build-in for Makefile checking
+    # export CONFIG_WLAN_DRV_BUILD_IN=y
+
     ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
-        $(info $$CONFIG_MTK_COMBO_CHIP is [${CONFIG_MTK_COMBO_CHIP}])
-        MTK_PLATFORM_ID := $(patsubst CONSYS_%,%,$(subst ",,$(CONFIG_MTK_COMBO_CHIP)))
-        $(info MTK_PLATFORM_ID is [${MTK_PLATFORM_ID}])
 
         # for gen4m options
         export CONFIG_MTK_COMBO_WIFI_HIF=axi
@@ -54,26 +54,28 @@ endif
         export WLAN_CHIP_ID=6785
         export MTK_ANDROID_WMT=y
         export MTK_ANDROID_EMI=y
-
         export WIFI_IP_SET=2
         export WIFI_ECO_VER=1
-
         export CFG_FM_CHIP_ID=6785
         export CFG_FM_CHIP=mt6631
+        export ADAPTOR_OPTS=$(MTK_COMBO_CHIP)
 
         # Do build-in for xxx.c checking
         subdir-ccflags-y += -D MTK_WCN_REMOVE_KERNEL_MODULE
         subdir-ccflags-y += -D MTK_WCN_BUILT_IN_DRIVER
+        obj-$(CONFIG_MTK_COMBO) += common/
+        obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
+        obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6785) += wlan/core/gen4m/
 
     endif
 
 obj-$(CONFIG_MTK_FMRADIO) += fmradio/
 obj-$(CONFIG_MTK_BTIF) += bt/mt66xx/wmt/
 obj-$(CONFIG_MTK_COMBO_GPS) += gps/
-obj-$(CONFIG_MTK_COMBO) += common/
-obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
-obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6785) += wlan/core/gen4m/
 obj-$(CONFIG_MTK_CONNFEM) += connfem/
+
+# Remove debugging
+export TARGET_BUILD_VARIANT=user
 
 # Otherwise we were called directly from the command line;
 # invoke the kernel build system.
