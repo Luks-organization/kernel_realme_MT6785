@@ -16,7 +16,7 @@ if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clan
 fi	
 rm -rf out
 rm -rf AnyKernel
-make O=out ARCH=arm64 sala_defconfig
+make O=out ARCH=arm64 salaa_defconfig
 PATH="${PWD}/clang/bin:${PATH}" \
 make -j$(nproc --all) O=out \
                       ARCH=arm64 \
