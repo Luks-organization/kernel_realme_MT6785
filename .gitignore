@@ -137,6 +137,9 @@ out/
 #Ignoring Android.bp link file
 #
 Android.bp
+<<<<<<< HEAD
 
 *.orig
 >>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
+=======
+>>>>>>> parent of eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
