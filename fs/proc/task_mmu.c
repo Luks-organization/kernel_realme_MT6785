@@ -350,10 +350,6 @@ static void show_vma_header_prefix(struct seq_file *m,
 		   MAJOR(dev), MINOR(dev), ino);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
 static void show_vma_header_prefix_fake(struct seq_file *m,
 				   unsigned long start, unsigned long end,
 				   vm_flags_t flags, unsigned long long pgoff,
@@ -364,36 +360,17 @@ static void show_vma_header_prefix_fake(struct seq_file *m,
 		   start,
 		   end,
 		   flags & VM_READ ? 'r' : '-',
-<<<<<<< HEAD
-<<<<<<< HEAD
-		   flags & VM_WRITE ? 'w' : '-',
-=======
 		   flags & VM_WRITE ? '-' : '-',
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
-=======
-		   flags & VM_WRITE ? '-' : '-',
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
 		   flags & VM_EXEC ? '-' : '-',
 		   flags & VM_MAYSHARE ? 's' : 'p',
 		   pgoff,
 		   MAJOR(dev), MINOR(dev), ino);
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-=======
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
 extern void susfs_sus_ino_for_show_map_vma(unsigned long ino, dev_t *out_dev, unsigned long *out_ino);
 #endif
 
-<<<<<<< HEAD
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
-=======
->>>>>>> parent of eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
-=======
->>>>>>> eb43cf615750 (Kernel: Import SuSFS 1.5.5+)
 static void
 show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 {
