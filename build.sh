@@ -8,8 +8,8 @@ export CCACHE_DIR=~/.ccache
 ccache -M 40G
 ccache -o compression=true
 export ARCH=arm64
-export KBUILD_BUILD_HOST=android-build
-export KBUILD_BUILD_USER="Luks"
+export KBUILD_BUILD_HOST="ubuntu"
+export KBUILD_BUILD_USER="luks"
 TANGGAL=$(date +"%Y%m%d-%H")
 clangbin=clang/bin/clang
 if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clang.git clang
@@ -30,7 +30,7 @@ make -j$(nproc --all) O=out \
                       OBJCOPY=llvm-objcopy \
                       OBJDUMP=llvm-objdump \
                       CROSS_COMPILE=aarch64-linux-gnu- \
-                      CROSS_COMPILE_ARM32=arm-linux-gnueabihf- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
                       CONFIG_NO_ERROR_ON_MISMATCH=y
 }
 function zupload()
@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Psionic-R3-Salaa-KernelSU-Next-${TANGGAL}.zip *
+zip -r9 Psionic-R3-Salaa-KernelSU-${TANGGAL}.zip *
 cd ../
 make clean && make mrproper
 fi

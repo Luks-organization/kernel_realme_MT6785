@@ -360,7 +360,7 @@ static void show_vma_header_prefix_fake(struct seq_file *m,
 		   start,
 		   end,
 		   flags & VM_READ ? 'r' : '-',
-		   flags & VM_WRITE ? '-' : '-',
+		   flags & VM_WRITE ? 'w' : '-',
 		   flags & VM_EXEC ? '-' : '-',
 		   flags & VM_MAYSHARE ? 's' : 'p',
 		   pgoff,
@@ -386,16 +386,16 @@ show_map_vma(struct seq_file *m, struct vm_area_struct *vma)
 	if (file) {
 		struct inode *inode = file_inode(vma->vm_file);
 #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
-		if (unlikely(inode->i_state & INODE_STATE_SUS_KSTAT)) {
-			susfs_sus_ino_for_show_map_vma(inode->i_ino, &dev, &ino);
-			goto bypass_orig_flow;
-		}
+ 		if (unlikely(inode->i_state & INODE_STATE_SUS_KSTAT)) {
+ 			susfs_sus_ino_for_show_map_vma(inode->i_ino, &dev, &ino);
+ 			goto bypass_orig_flow;
+ 		}
 #endif
 		dev = inode->i_sb->s_dev;
 		ino = inode->i_ino;
-#ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
-bypass_orig_flow:
-#endif
+ #ifdef CONFIG_KSU_SUSFS_SUS_KSTAT
+ bypass_orig_flow:
+ #endif
 		pgoff = ((loff_t)vma->vm_pgoff) << PAGE_SHIFT;
         struct dentry *dentry = file->f_path.dentry;
         if (dentry) {
