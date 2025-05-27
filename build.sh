@@ -41,7 +41,7 @@ then
 echo  " Failed To Compile Kernel"
 else
 echo -e " Kernel Compile Successful"
-git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
+git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
 zip -r9 Psionic-R3-Salaa-Kernel-${TANGGAL}.zip *
