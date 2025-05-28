@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Psionic-R3-Salaa-Kernel-${TANGGAL}.zip *
+zip -r9 Lineage-Salaa-Kernel-${TANGGAL}.zip *
 cd ../
 make clean && make mrproper
 fi
