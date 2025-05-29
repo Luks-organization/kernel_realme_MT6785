@@ -8,7 +8,7 @@ export CCACHE_DIR=~/.ccache
 ccache -M 40G
 ccache -o compression=true
 export ARCH=arm64
-export KBUILD_BUILD_HOST="ubuntu"
+export KBUILD_BUILD_HOST="pop-os"
 export KBUILD_BUILD_USER="luks"
 TANGGAL=$(date +"%Y%m%d-%H")
 clangbin=clang/bin/clang
@@ -41,10 +41,10 @@ then
 echo  " Failed To Compile Kernel"
 else
 echo -e " Kernel Compile Successful"
-git clone --depth=1 https://github.com/StimLuks87/AnyKernel3.git AnyKernel
+git clone --depth=1 https://github.com/Luks-organization/KerneSU_AnyKernel3 AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Psionic-R3-Salaa-KernelSU-${TANGGAL}.zip *
+zip -r9 Lineage_salaa-KernelSU-Next-${TANGGAL}.zip *
 cd ../
 make clean && make mrproper
 fi
