@@ -19,6 +19,7 @@ source "drivers/soc/versatile/Kconfig"
 source "drivers/soc/zte/Kconfig"
 source "drivers/soc/oplus/oplus_als_cali_value/Kconfig"
 source "drivers/soc/oplus/oplus_custom/Kconfig"
+source "drivers/soc/oplus/game_opt/Kconfig"
 
 #ifdef OPLUS_BUG_STABILITY
 source "drivers/soc/oplus/system/Kconfig"

@@ -76,6 +76,7 @@ modules.builtin
 !.gitignore
 !.mailmap
 !.cocciconfig
+!.clang-format
 
 #
 # Generated include files
@@ -124,10 +125,3 @@ all.config
 
 # fetched Android config fragments
 kernel/configs/android-*.cfg
-
-# Build
-AnyKernel/
-clang/
-gcc32/
-gcc64/
-out/
