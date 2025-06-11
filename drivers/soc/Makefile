@@ -42,3 +42,6 @@ obj-$(CONFIG_OPLUS_FEATURE_CUSTOM)   +=  oplus/oplus_custom/
 obj-$(CONFIG_OPLUS_ALS_CALI)   +=  oplus/oplus_als_cali_value/
 # endif /* OPLUS_FEATURE_SENSOR */
 
+# ifdef OPLUS_FEATURE_GAME
+obj-$(CONFIG_OPLUS_FEATURE_GAME_OPT)   +=  oplus/game_opt/
+# endif /* OPLUS_FEATURE_GAME */

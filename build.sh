@@ -8,8 +8,8 @@ export CCACHE_DIR=~/.ccache
 ccache -M 40G
 ccache -o compression=true
 export ARCH=arm64
-export KBUILD_BUILD_HOST="pop-os"
-export KBUILD_BUILD_USER="luks"
+export KBUILD_BUILD_HOST="android-build"
+export KBUILD_BUILD_USER="Luks"
 TANGGAL=$(date +"%Y%m%d-%H")
 clangbin=clang/bin/clang
 if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clang.git clang
@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/Luks-organization/KerneSU_AnyKernel3 AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Lineage_salaa-KernelSU-Next-${TANGGAL}.zip *
+zip -r9 Psionic-Salaa-KernelSU-${TANGGAL}.zip *
 cd ../
 make clean && make mrproper
 fi
