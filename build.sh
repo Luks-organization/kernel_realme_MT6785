@@ -12,7 +12,7 @@ export KBUILD_BUILD_HOST="pop-os"
 export KBUILD_BUILD_USER="luks"
 TANGGAL=$(date +"%Y%m%d-%H")
 clangbin=clang/bin/clang
-if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/RismaPwd/clang.git clang
+if ! [ -a $clangbin ]; then git clone --depth=1 https://github.com/Luks-organization/proton-clang clang
 fi	
 rm -rf out
 rm -rf AnyKernel
@@ -44,7 +44,7 @@ echo -e " Kernel Compile Successful"
 git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 Lineage-Salaa-Kernel-${TANGGAL}.zip *
+zip -r9 4.14.456-Salaa-Kernel-${TANGGAL}.zip *
 cd ../
 make clean && make mrproper
 fi
