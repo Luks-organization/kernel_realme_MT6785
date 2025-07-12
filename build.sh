@@ -2,21 +2,28 @@
 function compile()
 {
 source ~/.bashrc && source ~/.profile
-export LC_ALL=C
-export USE_CCACHE=1
-export CCACHE_DIR=~/.ccache
-ccache -M 40G
-ccache -o compression=true
+export LC_ALL=C && export USE_CCACHE=1
+ccache -M 50G
 export ARCH=arm64
-export KBUILD_BUILD_HOST="pop-os"
-export KBUILD_BUILD_USER="luks"
-TANGGAL=$(date +"%Y%m%d-%H")
+export KBUILD_BUILD_HOST="android-build-mtk"
+export KBUILD_BUILD_USER="Luks"
+export DEVICE=salaa
+DATE=$(date '+%Y%m%d-%H%M')
+
 clangbin=clang/bin/clang
-if ! [ -a $clangbin ]; then git clone --depth=1 https://github.com/Luks-organization/proton-clang clang
-fi	
+if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/LeCmnGend/clang.git -b clang-19 clang
+fi
+	
 rm -rf out
-rm -rf AnyKernel
 make O=out ARCH=arm64 salaa_defconfig
+mkdir tmp
+cp -r out/.config tmp/final_config
+find out -type f -name "*.ko" -delete
+make O=out ARCH=arm64 tmp/final_config
+rm -rf tmp 
+
+CCACHE_EXEC=$(which ccache)
+
 PATH="${PWD}/clang/bin:${PATH}" \
 make -j$(nproc --all) O=out \
                       ARCH=arm64 \
@@ -29,25 +36,23 @@ make -j$(nproc --all) O=out \
                       STRIP=llvm-strip \
                       OBJCOPY=llvm-objcopy \
                       OBJDUMP=llvm-objdump \
-                      CROSS_COMPILE=aarch64-linux-gnu- \
-                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-                      CONFIG_NO_ERROR_ON_MISMATCH=y
+                      CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
+                      CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
+	              modules \
+	              Image.gz-dtb modules \
+                      CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log
 }
 function zupload()
 {
-zimage=out/arch/arm64/boot/Image.gz-dtb
-if ! [ -a $zimage ];
-then
-echo  " Failed To Compile Kernel"
-else
-echo -e " Kernel Compile Successful"
+rm -rf AnyKernel
 git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel
+mkdir -p AnyKernel/modules/system/vendor/lib/modules
+find out -type f -name "*.ko" -exec cp -f {} AnyKernel/modules/system/vendor/lib/modules \;
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 4.14.456-Salaa-Kernel-${TANGGAL}.zip *
+zip -r9 4.14.456-Openela-KERNEL-${DEVICE}-${DATE}-BKA.zip * -x '*.git*' README.md *placeholder
 cd ../
 make clean && make mrproper
-fi
 }
 compile
 zupload
