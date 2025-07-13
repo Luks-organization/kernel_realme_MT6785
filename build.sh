@@ -36,8 +36,8 @@ make -j$(nproc --all) O=out \
                       STRIP=llvm-strip \
                       OBJCOPY=llvm-objcopy \
                       OBJDUMP=llvm-objdump \
-                      CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
-                      CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
+                      CROSS_COMPILE=aarch64-linux-gnu- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
 	              modules \
 	              Image.gz-dtb modules \
                       CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log
