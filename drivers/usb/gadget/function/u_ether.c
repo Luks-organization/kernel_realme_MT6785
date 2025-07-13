@@ -1537,12 +1537,10 @@ EXPORT_SYMBOL_GPL(gether_get_qmult);
 
 int gether_get_ifname(struct net_device *net, char *name, int len)
 {
-	int ret;
-
 	rtnl_lock();
-	ret = scnprintf(name, len, "%s\n", netdev_name(net));
+	strlcpy(name, netdev_name(net), len);
 	rtnl_unlock();
-	return ret;
+	return strlen(name);
 }
 EXPORT_SYMBOL_GPL(gether_get_ifname);
 
