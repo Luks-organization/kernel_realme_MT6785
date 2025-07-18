@@ -2740,6 +2740,7 @@
 
 	mt_charger: mt_charger {
 		compatible = "mediatek,mt-charger";
+		bootmode = <&chosen>;
 	};
 
 	lk_charger: lk_charger {
@@ -2778,6 +2779,7 @@
 		power_path_support;
 		enable_dynamic_mivr;
 		disable_pd_dual;
+		bootmode = <&chosen>;
 
 		/* common */
 		battery_cv = <4350000>;
