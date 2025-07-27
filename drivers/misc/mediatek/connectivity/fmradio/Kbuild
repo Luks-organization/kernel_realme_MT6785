@@ -42,6 +42,10 @@ endif
 
 ###############################################################################
 
+CFG_FM_CHIP := mt6631
+CFG_FM_PLAT := $(CFG_FM_CHIP)
+CFG_BUILD_CONNAC2 := false
+
 $(info [fm_drv:Kbuild] M = $(M))
 $(info [fm_drv:Kbuild] CFG_FM_PLAT = $(CFG_FM_PLAT))
 $(info [fm_drv:Kbuild] CFG_BUILD_CONNAC2 = $(CFG_BUILD_CONNAC2))
@@ -173,4 +177,3 @@ $(MODULE_NAME)-objs += $($(FM_CHIP)-objs)
 #obj-$(CONFIG_MTK_FMRADIO) += private/
 
 obj-y += dummy.o
-

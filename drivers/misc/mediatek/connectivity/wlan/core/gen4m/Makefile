@@ -401,11 +401,7 @@ else
 endif
 
 # Disable ASSERT() for user load, enable for others
-ifneq ($(TARGET_BUILD_VARIANT),user)
-    ccflags-y += -DBUILD_QA_DBG=1
-else
-    ccflags-y += -DBUILD_QA_DBG=0
-endif
+ccflags-y += -DBUILD_QA_DBG=0
 
 ifeq ($(CONFIG_MTK_COMBO_WIFI),y)
     ccflags-y += -DCFG_WPS_DISCONNECT=1
@@ -500,7 +496,7 @@ endif
 
 MODULE_NAME := wlan_drv_gen4m
 ifeq ($(MODULE_NAME),)
-MODULE_NAME := wlan_drv_gen4m
+MODULE_NAME := wlan_$(shell echo $(strip $(WLAN_CHIP_ID)) | tr A-Z a-z)_$(CONFIG_MTK_COMBO_WIFI_HIF)
 endif
 
 ccflags-y += -DDBG=0
