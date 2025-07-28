@@ -1,6 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0
 # Copyright (c) 2021 Mediatek Inc.
 
+CFG_FM_CHIP := mt6631
+CFG_FM_PLAT := $(CFG_FM_CHIP)
+
 ###############################################################################
 # Necessary Check
 
@@ -41,10 +44,6 @@ endif
 # fm support
 
 ###############################################################################
-
-CFG_FM_CHIP := mt6631
-CFG_FM_PLAT := $(CFG_FM_CHIP)
-CFG_BUILD_CONNAC2 := false
 
 $(info [fm_drv:Kbuild] M = $(M))
 $(info [fm_drv:Kbuild] CFG_FM_PLAT = $(CFG_FM_PLAT))
@@ -177,3 +176,4 @@ $(MODULE_NAME)-objs += $($(FM_CHIP)-objs)
 #obj-$(CONFIG_MTK_FMRADIO) += private/
 
 obj-y += dummy.o
+

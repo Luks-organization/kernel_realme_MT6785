@@ -19,8 +19,13 @@ ccflags-y += -Wno-unused-variable
 # Force build fail on modpost warning
 KBUILD_MODPOST_FAIL_ON_WARNINGS := y
 
-ccflags-y += -D FW_LOG_DEFAULT_ON=0
-ccflags-y += -D BUILD_QA_DBG=0
+$(info $(LOG_TAG) TARGET_BUILD_VARIANT = $(TARGET_BUILD_VARIANT))
+ifeq ("$(TARGET_BUILD_VARIANT)","user")
+    ccflags-y += -D FW_LOG_DEFAULT_ON=0
+else
+    ccflags-y += -D FW_LOG_DEFAULT_ON=1
+endif
+
 
 # platform
 ccflags-y += -D CONNAC1X_CHIPID=$(BT_PLATFORM)
@@ -56,11 +61,7 @@ ccflags-y += -I$(src)/../include/btif
 ###############################################################################
 
 MODULE_NAME := bt_drv_$(BT_PLATFORM)
-ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
 obj-y += $(MODULE_NAME).o
-else
-obj-m += $(MODULE_NAME).o
-endif
 
 ccflags-y += -D CREATE_NODE_DYNAMIC=1
 
