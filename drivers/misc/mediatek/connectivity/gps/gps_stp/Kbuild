@@ -13,11 +13,6 @@
 # Necessary Check
 ifeq ($(CONFIG_MTK_GPS_SUPPORT), y)
 
-ifeq ($(AUTOCONF_H),)
-    $(error AUTOCONF_H is not defined)
-endif
-
-ccflags-y += -imacros $(AUTOCONF_H)
 ifndef TOP
     TOP := $(srctree)/..
 endif
@@ -62,7 +57,11 @@ ccflags-y += -I$(srctree)/drivers/misc/mediatek/connectivity/common
 ###############################################################################
 
 MODULE_NAME := gps_drv_stp
+ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
+obj-y += $(MODULE_NAME).o
+else
 obj-m += $(MODULE_NAME).o
+endif
 
 GPS_DRV_CONTROL_LNA := y
 GPS_SRC_FOLDER := $(TOP)/vendor/mediatek/kernel_modules/connectivity/gps/gps_stp
