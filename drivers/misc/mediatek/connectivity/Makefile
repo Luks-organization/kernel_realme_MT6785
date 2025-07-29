@@ -66,6 +66,9 @@ export MTK_WLAN_SERVICE=yes
 export CFG_FM_CHIP_ID=6785
 export CFG_FM_CHIP=mt6631
 
+# Remove debugging
+export TARGET_BUILD_VARIANT=user
+
 obj-$(CONFIG_MTK_COMBO) += common/
 obj-$(CONFIG_MTK_COMBO_WIFI) += wlan/adaptor/
 obj-$(CONFIG_MTK_COMBO_CHIP_CONSYS_6785) += wlan/core/gen4m/
