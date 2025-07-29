@@ -6,7 +6,7 @@ export LC_ALL=C && export USE_CCACHE=1
 ccache -M 50G
 export ARCH=arm64
 export KBUILD_BUILD_HOST="android-build-mtk"
-export KBUILD_BUILD_USER="Luks"
+export KBUILD_BUILD_USER="Stim"
 export DEVICE=salaa
 DATE=$(date '+%Y%m%d-%H%M')
 
