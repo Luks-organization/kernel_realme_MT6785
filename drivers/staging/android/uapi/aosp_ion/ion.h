@@ -1,5 +1,5 @@
 /*
- * drivers/staging/android/uapi/ion.h
+ * drivers/staging/android/uapi/aosp_ion/ion.h
  *
  * Copyright (C) 2011 Google, Inc.
  *

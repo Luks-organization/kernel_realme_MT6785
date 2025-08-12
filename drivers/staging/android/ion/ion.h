@@ -1,5 +1,5 @@
 /*
- * drivers/staging/android/ion/ion.h
+ * drivers/staging/android/ion/aosp_ion/ion.h
  *
  * Copyright (C) 2011 Google, Inc.
  *
@@ -19,7 +19,7 @@
 
 #include <linux/types.h>
 
-#include "../uapi/ion.h"
+#include "../uapi/aosp_ion/ion.h"
 
 struct ion_handle;
 struct ion_device;
