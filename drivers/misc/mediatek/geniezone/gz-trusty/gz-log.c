@@ -172,7 +172,7 @@ static void gz_log_find_mblock(void)
 	else
 		glctx.flag = STATIC_NOMAP;
 
-	pr_info("[%s] rmem:%s base(0x%llx) size(0x%zx) flag(%u)\n",
+	pr_info("[%s] rmem:%s base(%pa) size(0x%zx) flag(%u)\n",
 		__func__, gz_node->name, glctx.paddr, glctx.size, glctx.flag);
 }
 #endif
