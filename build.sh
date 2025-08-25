@@ -16,28 +16,12 @@ function error_exit() {
     exit 1
 }
 
-function setup_env() {
-    log "Setting up environment..."
-
-    if [ ! -d "env" ]; then
-        git clone https://github.com/akhilnarang/scripts env || error_exit "Failed to clone environment scripts."
-    fi
-
-    bash env/setup/android_build_env.sh || error_exit "Failed to set up Android build environment."
-}
-
 function download_toolchains() {
     log "Downloading and setting up toolchains..."
 
     if [ ! -d "clang" ]; then
-        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz \
-            && mkdir clang \
-            && tar -xf clang.tar.gz -C clang \
-            && rm -f clang.tar.gz || error_exit "Failed to download or extract clang."
+        git clone --depth=1 https://gitlab.com/LeCmnGend/clang.git -b clang-19 clang
     fi
-
-    [ ! -d "los-4.9-64" ] && git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 los-4.9-64
-    [ ! -d "los-4.9-32" ] && git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 los-4.9-32
 }
 
 function compile_kernel() {
@@ -57,7 +41,7 @@ function compile_kernel() {
 
     make O=out ARCH=arm64 salaa_defconfig
 
-    PATH="${PWD}/clang/bin:${PWD}/los-4.9-32/bin:${PWD}/los-4.9-64/bin:${PATH}"
+    PATH="${PWD}/clang/bin:${PATH}" \
 
     make -j$(nproc --all) O=out \
         ARCH=arm64 \
@@ -69,9 +53,8 @@ function compile_kernel() {
         STRIP=llvm-strip \
         OBJCOPY=llvm-objcopy \
         OBJDUMP=llvm-objdump \
-        CLANG_TRIPLE=aarch64-linux-gnu- \
-        CROSS_COMPILE="${PWD}/los-4.9-64/bin/aarch64-linux-android-" \
-        CROSS_COMPILE_ARM32="${PWD}/los-4.9-32/bin/arm-linux-androideabi-" \
+        CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
+        CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
         CONFIG_NO_ERROR_ON_MISMATCH=y \
         2>&1 | tee error.log || error_exit "Kernel build failed. Check error.log"
 }
@@ -90,16 +73,15 @@ function zip_kernel() {
     cp "$KERNEL_IMAGE" AnyKernel || error_exit "Failed to copy kernel image"
     cd AnyKernel || exit
     zip -r9 4.14.456-Openela-KERNEL-${DATE}-salaa.zip * || error_exit "Zipping failed"
-    make clean && make mrproper
     log "Kernel zip created: AnyKernel/4.14.456-Openela-KERNEL-${DATE}-salaa.zip"
 }
 
 function main() {
     log "On upstream-xx branch"
-    setup_env
     download_toolchains
     compile_kernel
     zip_kernel
 }
 
 main "$@"
+make clean && make mrproper

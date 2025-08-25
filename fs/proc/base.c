@@ -108,7 +108,7 @@ struct task_kill_info {
 	struct work_struct work;
 };
 
-static void proc_kill_task(struct work_struct *work)
+static void __maybe_unused proc_kill_task(struct work_struct *work)
 {
 	struct task_kill_info *kinfo = container_of(work, typeof(*kinfo), work);
 	struct task_struct *task = kinfo->task;
