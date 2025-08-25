@@ -1,58 +1,105 @@
 #!/bin/bash
-function compile()
-{
-source ~/.bashrc && source ~/.profile
-export LC_ALL=C && export USE_CCACHE=1
-ccache -M 50G
-export ARCH=arm64
-export KBUILD_BUILD_HOST="android-build-mtk"
-export KBUILD_BUILD_USER="Stim"
-export DEVICE=salaa
-DATE=$(date '+%Y%m%d-%H%M')
+set -euo pipefail
+IFS=$'\n\t'
 
-clangbin=clang/bin/clang
-if ! [ -a $clangbin ]; then git clone --depth=1 https://gitlab.com/LeCmnGend/clang.git -b clang-19 clang
-fi
-	
-rm -rf out
-make O=out ARCH=arm64 salaa_defconfig
-mkdir tmp
-cp -r out/.config tmp/final_config
-find out -type f -name "*.ko" -delete
-make O=out ARCH=arm64 tmp/final_config
-rm -rf tmp 
+# Colors for output
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+NC="\033[0m" # No Color
 
-CCACHE_EXEC=$(which ccache)
-
-PATH="${PWD}/clang/bin:${PATH}" \
-make -j$(nproc --all) O=out \
-                      ARCH=arm64 \
-                      CC="clang" \
-                      LLVM=1 \
-                      LLVM_IAS=1 \
-                      LD=ld.lld \
-                      AR=llvm-ar \
-                      NM=llvm-nm \
-                      STRIP=llvm-strip \
-                      OBJCOPY=llvm-objcopy \
-                      OBJDUMP=llvm-objdump \
-                      CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
-                      CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
-	              modules \
-	              Image.gz-dtb modules \
-                      CONFIG_NO_ERROR_ON_MISMATCH=y 2>&1 | tee error.log
+function log() {
+    echo -e "${GREEN}[*] $1${NC}"
 }
-function zupload()
-{
-rm -rf AnyKernel
-git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel
-mkdir -p AnyKernel/modules/system/vendor/lib/modules
-find out -type f -name "*.ko" -exec cp -f {} AnyKernel/modules/system/vendor/lib/modules \;
-cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
-cd AnyKernel
-zip -r9 4.14.456-Openela-KERNEL-${DEVICE}-${DATE}-BKA.zip * -x '*.git*' README.md *placeholder
-cd ../
-make clean && make mrproper
+
+function error_exit() {
+    echo -e "${RED}[!] $1${NC}" >&2
+    exit 1
 }
-compile
-zupload
+
+function setup_env() {
+    log "Setting up environment..."
+
+    if [ ! -d "env" ]; then
+        git clone https://github.com/akhilnarang/scripts env || error_exit "Failed to clone environment scripts."
+    fi
+
+    bash env/setup/android_build_env.sh || error_exit "Failed to set up Android build environment."
+}
+
+function download_toolchains() {
+    log "Downloading and setting up toolchains..."
+
+    if [ ! -d "clang" ]; then
+        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz \
+            && mkdir clang \
+            && tar -xf clang.tar.gz -C clang \
+            && rm -f clang.tar.gz || error_exit "Failed to download or extract clang."
+    fi
+
+    [ ! -d "los-4.9-64" ] && git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 los-4.9-64
+    [ ! -d "los-4.9-32" ] && git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 los-4.9-32
+}
+
+function compile_kernel() {
+    log "Starting kernel compilation..."
+
+    rm -rf out AnyKernel
+    mkdir -p out
+
+    source ~/.bashrc || true
+    source ~/.profile || true
+
+    export LC_ALL=C
+    export USE_CCACHE=1
+    export ARCH=arm64
+    export KBUILD_BUILD_USER="LUKS"
+    export KBUILD_BUILD_HOST="android-build-mtk"
+
+    make O=out ARCH=arm64 salaa_defconfig
+
+    PATH="${PWD}/clang/bin:${PWD}/los-4.9-32/bin:${PWD}/los-4.9-64/bin:${PATH}"
+
+    make -j$(nproc --all) O=out \
+        ARCH=arm64 \
+        CC="clang" \
+        LLVM=1 \
+        LD=ld.lld \
+        AR=llvm-ar \
+        NM=llvm-nm \
+        STRIP=llvm-strip \
+        OBJCOPY=llvm-objcopy \
+        OBJDUMP=llvm-objdump \
+        CLANG_TRIPLE=aarch64-linux-gnu- \
+        CROSS_COMPILE="${PWD}/los-4.9-64/bin/aarch64-linux-android-" \
+        CROSS_COMPILE_ARM32="${PWD}/los-4.9-32/bin/arm-linux-androideabi-" \
+        CONFIG_NO_ERROR_ON_MISMATCH=y \
+        2>&1 | tee error.log || error_exit "Kernel build failed. Check error.log"
+}
+
+function zip_kernel() {
+    log "Zipping kernel..."
+
+    DATE=$(date "+%d%m%Y")
+    KERNEL_IMAGE="out/arch/arm64/boot/Image.gz-dtb"
+
+    if [ ! -f "$KERNEL_IMAGE" ]; then
+        error_exit "Kernel image not found at $KERNEL_IMAGE"
+    fi
+
+    git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel || error_exit "Failed to clone AnyKernel3"
+    cp "$KERNEL_IMAGE" AnyKernel || error_exit "Failed to copy kernel image"
+    cd AnyKernel || exit
+    zip -r9 4.14.456-Openela-KERNEL-${DATE}-salaa.zip * || error_exit "Zipping failed"
+    make clean && make mrproper
+    log "Kernel zip created: AnyKernel/4.14.456-Openela-KERNEL-${DATE}-salaa.zip"
+}
+
+function main() {
+    log "On upstream-xx branch"
+    setup_env
+    download_toolchains
+    compile_kernel
+    zip_kernel
+}
+
+main "$@"
