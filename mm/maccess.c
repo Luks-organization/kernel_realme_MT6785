@@ -181,8 +181,8 @@ long strncpy_from_unsafe(char *dst, const void *unsafe_addr, long count)
 }
 
 /**
- * strncpy_from_unsafe_user: - Copy a NUL terminated string from unsafe user
- *				address.
+ * strncpy_from_user_nofault: - Copy a NUL terminated string from unsafe user
+ *		address.
  * @dst:   Destination address, in kernel space.  This buffer must be at
  *         least @count bytes long.
  * @unsafe_addr: Unsafe user address.
@@ -198,8 +198,8 @@ long strncpy_from_unsafe(char *dst, const void *unsafe_addr, long count)
  * If @count is smaller than the length of the string, copies @count-1 bytes,
  * sets the last byte of @dst buffer to NUL and returns @count.
  */
-long strncpy_from_unsafe_user(char *dst, const void __user *unsafe_addr,
-			      long count)
+long strncpy_from_user_nofault(char *dst, const void __user *unsafe_addr,
+	          long count)
 {
 	mm_segment_t old_fs = get_fs();
 	long ret;
