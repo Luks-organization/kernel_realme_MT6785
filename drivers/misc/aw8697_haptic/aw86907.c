@@ -97,7 +97,7 @@ static char aw86907_ram_name[5][30] = {
 	{ "aw8697_haptic_170.bin" },
 };
 
-static char aw86907_long_sound_rtp_name[5][30] = {
+static char aw86907_long_sound_rtp_name[5][30] __attribute__((unused)) = {
 	{ "aw8697_long_sound_168.bin" },
 	{ "aw8697_long_sound_170.bin" },
 	{ "aw8697_long_sound_173.bin" },
@@ -159,7 +159,7 @@ static char aw86907_high_temp_high_humidity_0832[11][60] = {
 	{ "aw8697_high_temp_high_humidity_channel_RTP_51_234Hz.bin" },
 	{ "aw8697_high_temp_high_humidity_channel_RTP_51_235Hz.bin" },
 };
-static char aw86907_ringtone_rtp_f0_170_name[][AW86907_RTP_NAME_MAX] = {
+static char aw86907_ringtone_rtp_f0_170_name[][AW86907_RTP_NAME_MAX] __attribute__((unused)) = {
 	{ "aw8697_rtp.bin" },
 	{ "aw8697_Hearty_channel_RTP_1_170.bin" },
 	{ "aw8697_Instant_channel_RTP_2_170.bin" },
@@ -3502,9 +3502,9 @@ aw86907_old_work_file_load_accord_f0(struct aw86907 *aw86907)
 
 const struct firmware *aw86907_rtp_load_file_accord_f0(struct aw86907 *aw86907)
 {
-	const struct firmware *rtp_file;
-	unsigned int f0_file_num = 1024;
-	int ret = -1;
+       const struct firmware *rtp_file __attribute__((unused));
+       unsigned int f0_file_num __attribute__((unused)) = 1024;
+       int ret __attribute__((unused)) = -1;
 
 	if (aw86907->rtp_file_num == AW86907_WAVEFORM_INDEX_OLD_STEADY ||
 	    aw86907->rtp_file_num == AW86907_WAVEFORM_INDEX_HIGH_TEMP) {

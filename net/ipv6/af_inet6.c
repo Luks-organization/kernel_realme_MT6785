@@ -283,13 +283,8 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
 	struct sock *sk = sock->sk;
 	const struct proto *prot;
-	struct inet_sock *inet = inet_sk(sk);
-	struct ipv6_pinfo *np = inet6_sk(sk);
-	struct net *net = sock_net(sk);
-	__be32 v4addr = 0;
-	unsigned short snum;
-	bool saved_ipv6only;
-	int addr_type = 0;
+	struct inet_sock *inet __attribute__((unused)) = inet_sk(sk);
+	struct ipv6_pinfo *np __attribute__((unused)) = inet6_sk(sk);
 	int err = 0;
 
 	/* IPV6_ADDRFORM can change sk->sk_prot under us. */
