@@ -5,7 +5,7 @@ menuconfig MTK_FB
 	select FB_CFB_COPYAREA
 	select FB_CFB_IMAGEBLIT
 	select FB_SOFT_CURSOR
-	---help---
+	help
 	  This selects the MediaTek(R) frame buffer driver.
 	  Meditek Framebuffer Driver is driver display.
 	  If you want to use MediaTek(R) frame buffer diver, please make sure it is Y in xxx_defconfig.mk.
@@ -97,7 +97,7 @@ config MTK_FB_SUPPORT_ASSERTION_LAYER
 	select FONT_SUPPORT
 	select FONT_8x16
 	default y
-	---help---
+	help
 	  This enable support for AEE assertion layer.
 	  It define in xxx_defconfig.mk.
 	  If you want to enable AEE assertion layer support, say Y here.
