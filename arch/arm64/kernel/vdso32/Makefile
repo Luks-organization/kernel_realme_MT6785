@@ -5,15 +5,9 @@
 # A mix between the arm64 and arm vDSO Makefiles.
 
 ifeq ($(cc-name),clang)
-CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32) $(CLANG_GCC32_TC) $(CLANG_PREFIX32)
-ifneq ($(LLVM),)
-LD_ARM32 := $(LD)
+  CC_ARM32 := $(CC) $(CLANG_TARGET_ARM32)
 else
-LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
-endif
-else
-CC_ARM32 ?= $(CROSS_COMPILE_ARM32)$(cc-name)
-LD_ARM32 ?= $(CROSS_COMPILE_ARM32)ld
+  CC_ARM32 := $(CROSS_COMPILE_ARM32)$(cc-name)
 endif
 
 ifneq ($(LLVM),)
@@ -156,7 +150,7 @@ $(asm-obj-vdso): %.o: %.S FORCE
 
 # Actual build commands
 quiet_cmd_vdsold = VDSOL32   $@
-      cmd_vdsold = $(LD_ARM32) $(VDSO_LDFLAGS) \
+      cmd_vdsold = $(LD_COMPAT) $(VDSO_LDFLAGS) \
                    -T $(filter %.lds,$^) $(filter %.o,$^) -o $@
 quiet_cmd_vdsocc = VDSOC32   $@
       cmd_vdsocc = $(CC_ARM32) -Wp,-MD,$(depfile) $(VDSO_CFLAGS) -c -o $@ $<
