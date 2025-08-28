@@ -2214,7 +2214,7 @@ long ion_mm_ioctl(struct ion_client *client, unsigned int cmd,
 			param.get_phys_param.phy_addr = phy_addr;
 
 			mutex_unlock(&buffer->lock);
-		} else if ((enum mtk_ion_heap_type)buffer_type == ION_HEAP_TYPE_MULTIMEDIA_SEC) {
+		    } else if (buffer_type == ION_HEAP_TYPE_MULTIMEDIA_SEC) {
 			struct ion_heap *sec_heap;
 			ion_phys_addr_t phy_addr;
 			size_t len;

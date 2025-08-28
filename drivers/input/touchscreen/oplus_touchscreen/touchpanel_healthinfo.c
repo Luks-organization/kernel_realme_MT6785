@@ -5,7 +5,6 @@
 
 #include "touchpanel_healthinfo.h"
 
-#include <linux/types.h>
 #include <linux/err.h>
 #include <linux/string.h>
 #include <linux/sysfs.h>

@@ -27,6 +27,7 @@ function download_toolchains() {
 function compile_kernel() {
     log "Starting kernel compilation..."
 
+    make clean && make mrproper
     rm -rf out AnyKernel
     mkdir -p out
 
@@ -73,6 +74,7 @@ function zip_kernel() {
     cp "$KERNEL_IMAGE" AnyKernel || error_exit "Failed to copy kernel image"
     cd AnyKernel || exit
     zip -r9 4.14.456-Openela-KERNEL-${DATE}-salaa.zip * || error_exit "Zipping failed"
+    make clean && make mrproper
     log "Kernel zip created: AnyKernel/4.14.456-Openela-KERNEL-${DATE}-salaa.zip"
 }
 
@@ -84,4 +86,3 @@ function main() {
 }
 
 main "$@"
-make clean && make mrproper

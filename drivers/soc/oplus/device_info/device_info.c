@@ -262,7 +262,7 @@ struct file_operations fork_para_monitor_proc_fops = {
         .write = NULL,
 };
 
-static void recursive_fork_para_monitor(void) __attribute__((unused));
+
 static void recursive_fork_para_monitor(void)
 {
 		struct proc_dir_entry *pentry;
@@ -642,7 +642,7 @@ reinit_aboard_id(struct device *dev, struct manufacture_info *info)
 	int i = 0, ret = 0;
 	int id_size = 0;
 	uint32_t *main_val = NULL, *sub_val = NULL, *rf_val = NULL;
-	int active_val = 0, sleep_val = 0;
+	int active_val = 0, sleep_val = 0, idle_val = 0;
 	struct device_info *dev_info = g_dev_info;
 	bool match = false;
 
