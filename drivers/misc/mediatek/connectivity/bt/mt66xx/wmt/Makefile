@@ -4,12 +4,12 @@
 ###############################################################################
 # Necessary Check
 
-ifneq ($(KERNEL_OUT),)
-    ccflags-y += -imacros $(KERNEL_OUT)/include/generated/autoconf.h
-endif
-
 ifndef TOP
     TOP := $(srctree)/..
+endif
+
+ifneq ($(KERNEL_OUT),)
+    ccflags-y += -imacros $(KERNEL_OUT)/include/generated/autoconf.h
 endif
 
 $(warning set PM_QOS_CONTROL=1)

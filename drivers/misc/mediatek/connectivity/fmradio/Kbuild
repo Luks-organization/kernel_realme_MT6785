@@ -3,6 +3,7 @@
 
 CFG_FM_CHIP := mt6631
 CFG_FM_PLAT := $(CFG_FM_CHIP)
+CFG_FM_CHIP_ID = 6785
 
 ###############################################################################
 # Necessary Check

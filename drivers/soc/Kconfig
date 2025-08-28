@@ -30,4 +30,7 @@ source "drivers/soc/oplus/system/Kconfig"
 source "drivers/soc/oplus/device_info/Kconfig"
 ##endif /* OPLUS_FEATURE_TP_BASIC */
 
+#ifdef OPLUS_FEATURE_HEALTHINFO
+source "drivers/soc/oplus/healthinfo/Kconfig"
+#endif /* OPLUS_FEATURE_HEALTHINFO */
 endmenu

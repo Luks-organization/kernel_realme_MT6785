@@ -10,6 +10,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  */
+#include <linux/types.h>
 #include <linux/uaccess.h>
 #include <linux/err.h>
 #include <linux/of_device.h>
@@ -424,7 +425,6 @@ static long ion_sys_cache_sync(struct ion_client *client,
 	unsigned long kernel_va = 0;
 	unsigned long kernel_size = 0;
 	struct sg_table *table;
-	struct ion_heap *heap = NULL;
 	int is_kernel_addr = from_kernel;
 
 	/* Get kernel handle
@@ -543,10 +543,10 @@ static long ion_sys_cache_sync(struct ion_client *client,
 	    sync_type == ION_CACHE_FLUSH_BY_RANGE_USE_PA) {
 #if defined(CONFIG_MTK_IOMMU_PGTABLE_EXT) && \
 	(CONFIG_MTK_IOMMU_PGTABLE_EXT > 32)
-		m4u_mva_unmap_kernel((unsigned long)param->va,
+		m4u_mva_unmap_kernel((uintptr_t)param->va,
 				     sync_size, sync_va);
 #else
-		m4u_mva_unmap_kernel((unsigned int)param->va,
+		m4u_mva_unmap_kernel((uintptr_t)param->va,
 				     (unsigned int)sync_size, sync_va);
 #endif
 	} else if (ion_need_unmap_flag) {

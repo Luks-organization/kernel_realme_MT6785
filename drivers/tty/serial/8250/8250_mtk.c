@@ -88,6 +88,12 @@
 #define MTK_UART_TX_TRIGGER	1
 #define MTK_UART_RX_TRIGGER	MTK_UART_RX_SIZE
 
+#ifdef OPLUS_FEATURE_CHG_BASIC
+static struct pinctrl *serial_pinctrl = NULL;
+static struct pinctrl_state *rx_pinctrl_state_diable = NULL;
+static struct pinctrl_state *tx_pinctrl_state_diable = NULL;
+#endif /*OPLUS_FEATURE_CHG_BASIC*/
+
 #ifdef CONFIG_CONSOLE_LOCK_DURATION_DETECT
 char uart_write_statbuf[256];
 #endif
@@ -249,7 +255,6 @@ static void mtk8250_dma_enable(struct uart_8250_port *up)
 {
 	struct uart_8250_dma *dma = up->dma;
 	struct mtk8250_data *data = up->port.private_data;
-	int lcr = serial_in(up, UART_LCR);
 
 	if (data->rx_status != DMA_RX_START)
 		return;
@@ -671,10 +676,6 @@ static int mtk8250_probe(struct platform_device *pdev)
 #endif
 
 #ifdef OPLUS_FEATURE_CHG_BASIC
-static struct pinctrl *serial_pinctrl = NULL;
-static struct pinctrl_state *rx_pinctrl_state_diable = NULL;
-static struct pinctrl_state *tx_pinctrl_state_diable = NULL;
-
 	node = of_find_compatible_node(NULL, NULL, "mediatek,charger");
 	if (node)
 		uart0_detect_enable = of_property_read_bool(node, "qcom,uart0_detect_enable");

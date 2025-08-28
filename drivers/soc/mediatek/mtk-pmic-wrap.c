@@ -3527,6 +3527,7 @@ int pwrap_thread_kthread(void *x)
 	return 0;
 }
 
+static void pwrap_irq_thread_init(void) __attribute__((unused));
 static void pwrap_irq_thread_init(void)
 {
 	pwrap_init_wake_lock(&pwrapThread_lock, "pwrapThread_lock wakelock");

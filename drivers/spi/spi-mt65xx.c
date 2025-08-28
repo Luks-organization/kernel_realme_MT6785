@@ -426,7 +426,7 @@ static void mtk_spi_set_cs(struct spi_device *spi, bool enable)
 static void mtk_spi_prepare_transfer(struct spi_master *master,
 			struct spi_transfer *xfer, struct spi_device *spi)
 {
-	u32 spi_clk_hz, div, sck_time, cs_time, reg_val;
+	u32 div, sck_time, cs_time, reg_val;
 	struct mtk_spi *mdata = spi_master_get_devdata(master);
 	u32 cs_setuptime, cs_holdtime, cs_idletime = 0;
 	struct mtk_chip_config *chip_config = spi->controller_data;
