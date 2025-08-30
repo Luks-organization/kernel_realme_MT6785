@@ -2885,25 +2885,20 @@ long do_mount(const char *dev_name, const char __user *dir_name,
 		//mnt_flags |= MNT_RELATIME;
 
 	/* Separate the per-mountpoint flags */
-	if (flags & MS_NOSUID) {
+	if (flags & MS_NOSUID)
 		mnt_flags |= MNT_NOSUID;
-	}
-	if (flags & MS_NODEV) {
+	if (flags & MS_NODEV)
 		mnt_flags |= MNT_NODEV;
-	}
-	if (flags & MS_NOEXEC) {
+	if (flags & MS_NOEXEC)
 		mnt_flags |= MNT_NOEXEC;
-	}
 	//if (flags & MS_NOATIME)
-	//	mnt_flags |= MNT_NOATIME;
+		mnt_flags |= MNT_NOATIME;
 	//if (flags & MS_NODIRATIME)
-	//	mnt_flags |= MNT_NODIRATIME;
-	if (flags & MS_STRICTATIME) {
+		mnt_flags |= MNT_NODIRATIME;
+	if (flags & MS_STRICTATIME)
 		mnt_flags &= ~(MNT_RELATIME | MNT_NOATIME);
-	}
-	if (flags & MS_RDONLY) {
+	if (flags & MS_RDONLY)
 		mnt_flags |= MNT_READONLY;
-	}
 
 	/* The default atime for remount is preservation */
 	if ((flags & MS_REMOUNT) &&

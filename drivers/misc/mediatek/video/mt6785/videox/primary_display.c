@@ -235,6 +235,9 @@ static struct task_struct *decouple_update_rdma_config_thread;
 static struct task_struct *decouple_trigger_thread;
 static struct task_struct *init_decouple_buffer_thread;
 
+extern int disp_lcm_poweron_before_ulps(struct disp_lcm_handle *plcm);
+extern int disp_lcm_poweroff_after_ulps(struct disp_lcm_handle *plcm);
+
 static int decouple_mirror_update_rdma_config_thread(void *data);
 static int decouple_trigger_worker_thread(void *data);
 
@@ -5519,21 +5522,20 @@ done:
 			 MMPROFILE_FLAG_END, 0, 0);
 	DISPCHECK("%s end\n", __func__);
 	ddp_clk_check();
-	#ifdef OPLUS_BUG_STABILITY
 	/*
 	* add power seq api for ulps
 	*/
 	if (primary_display_get_power_mode_nolock() == FB_SUSPEND) {
 		disp_lcm_poweroff_after_ulps(pgc->plcm);
 	}
-	#endif /* OPLUS_BUG_STABILITY */
-
+	#ifdef OPLUS_BUG_STABILITY
 	/* #ifdef OPLUS_FEATURE_ONSCREENFINGERPRINT */
 	if (oplus_display_fppress_support) {
 		ds_rec_fpd = false;
 		doze_rec_fpd = false;
 	}
 	/* #endif */ /* OPLUS_FEATURE_ONSCREENFINGERPRINT */
+	#endif /* OPLUS_BUG_STABILITY */
 	return ret;
 }
 

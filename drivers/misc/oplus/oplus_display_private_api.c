@@ -25,6 +25,7 @@
 #include <soc/oppo/oppo_project.h>
 #include "primary_display.h"
 #include "display_panel/oplus_display_panel.h"
+#include "../../input/oplus_fp_drivers/include/oplus_fp_common.h"
 
 /*
  * we will create a sysfs which called /sys/kernel/oppo_display,
@@ -46,6 +47,7 @@ bool oppo_display_sau_support;
 unsigned long oplus_display_brightness = 0;
 unsigned int oplus_set_brightness = 0;
 unsigned int aod_light_mode = 0;
+unsigned int __attribute__((weak)) delay_uiready = 0;
 extern unsigned int real_backlight_level;
 bool oplus_flag_lcd_off = false;
 unsigned long oplus_silence_mode = 0;
@@ -101,7 +103,6 @@ extern void __attribute((weak)) _primary_path_lock(const char *caller) {return;}
 extern void __attribute((weak)) _primary_path_unlock(const char *caller) {return;};
 extern int __attribute((weak)) primary_display_aod_backlight(int level) {return 0;};
 extern bool __attribute((weak)) primary_display_get_fp_hbm_state(void) {return 0;};
-extern unsigned int __attribute((weak)) delay_uiready;
 #if defined(CONFIG_MACH_MT6785)
 extern enum DISP_HELPER_STAGE disp_helper_get_stage(void);
 extern const char *disp_helper_stage_spy(void);
@@ -109,6 +110,8 @@ extern void oplus_delayed_trigger_kick_set(int params);
 extern void oplus_cmdq_flush_config_handle_mira(void *handle, int blocking);
 extern void oplus_cmdq_handle_clear_dirty(struct cmdqRecStruct *cmdq_handle);
 extern int _is_lcm_inited(struct disp_lcm_handle *plcm);
+extern int disp_lcm_poweron_before_ulps(struct disp_lcm_handle *plcm);
+extern int disp_lcm_poweroff_after_ulps(struct disp_lcm_handle *plcm);
 
 static int disp_lcm_set_safe_mode(struct disp_lcm_handle *plcm, void *handle, unsigned int mode)
 {
@@ -893,6 +896,7 @@ static ssize_t LCM_HBM_store(struct device *dev,
 		struct device_attribute *attr, const char *buf, size_t num)
 {
 	int ret;
+	//unsigned char payload[100] = "";
 	printk("oplus_display_hbm_support = %d\n", oplus_display_hbm_support);
 	if (oplus_display_hbm_support) {
 		HBM_pre_mode = HBM_mode;
@@ -946,6 +950,72 @@ int oplus_display_panel_get_hbm(void *buf)
 	return 0;
 }
 
+#ifdef OPLUS_BUG_STABILITY
+int disp_lcm_oplus_set_lcm_cabc_cmd(struct disp_lcm_handle *plcm, void *handle, unsigned int level)
+{
+	struct LCM_DRIVER *lcm_drv = NULL;
+
+	DISPFUNC();
+	if (_is_lcm_inited(plcm)) {
+		lcm_drv = plcm->drv;
+		if (lcm_drv->set_cabc_mode_cmdq) {
+			lcm_drv->set_cabc_mode_cmdq(handle, level);
+		} else {
+			DISP_PR_ERR("FATAL ERROR, lcm_drv->oppo_set_cabc_mode_cmdq is null\n");
+			return -1;
+		}
+
+		return 0;
+	}
+
+	DISP_PR_ERR("lcm_drv is null\n");
+	return -1;
+}
+
+/*
+* add power seq api for ulps
+*/
+int disp_lcm_poweron_before_ulps(struct disp_lcm_handle *plcm)
+{
+	struct LCM_DRIVER *lcm_drv = NULL;
+
+	DISPFUNC();
+	if (_is_lcm_inited(plcm)) {
+		lcm_drv = plcm->drv;
+		if (lcm_drv->poweron_before_ulps) {
+			lcm_drv->poweron_before_ulps();
+		} else {
+			DISP_PR_ERR("FATAL ERROR, lcm_drv->poweron_before_ulps is null\n");
+			return -1;
+		}
+		return 0;
+	}
+	DISP_PR_ERR("lcm_drv is null\n");
+	return -1;
+}
+
+int disp_lcm_poweroff_after_ulps(struct disp_lcm_handle *plcm)
+{
+	struct LCM_DRIVER *lcm_drv = NULL;
+
+	DISPFUNC();
+	if (_is_lcm_inited(plcm)) {
+		lcm_drv = plcm->drv;
+		if (lcm_drv->poweroff_after_ulps) {
+			//if ((0 == tp_gesture_enable_flag()) || (1 == display_esd_recovery_lcm())) {
+			//if (0 == tp_gesture_enable_flag()) {
+				lcm_drv->poweroff_after_ulps();
+			//}
+		} else {
+			DISP_PR_ERR("FATAL ERROR, lcm_drv->poweroff_after_ulps is null\n");
+			return -1;
+		}
+		return 0;
+	}
+	DISP_PR_ERR("lcm_drv is null\n");
+	return -1;
+}
+#endif /* OPLUS_BUG_STABILITY */
 
 #if 0
 unsigned int ffl_set_mode = 0;

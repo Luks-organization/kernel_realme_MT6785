@@ -255,6 +255,10 @@ int ufs_mtk_pltfrm_xo_ufs_req(struct ufs_hba *hba, bool on)
 		return 0;
 	}
 
+	/* inform ATF clock is on */
+	if (on)
+		mt_secure_call(MTK_SIP_KERNEL_UFS_CTL, 4, 1, 0, 0);
+
 	/*
 	 * Delay before disable ref-clk: H8 -> delay A -> disable ref-clk
 	 *		delayA

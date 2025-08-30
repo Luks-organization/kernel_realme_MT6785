@@ -574,7 +574,7 @@ static long ion_sys_cache_sync(struct ion_client *client,
 		m4u_mva_unmap_kernel((unsigned long)param->va,
 				     sync_size, sync_va);
 #else
-		m4u_mva_unmap_kernel((unsigned int)param->va,
+		m4u_mva_unmap_kernel((unsigned int)(uintptr_t)param->va,
 				     (unsigned int)sync_size, sync_va);
 #endif
 	} else if (ion_need_unmap_flag) {
@@ -589,8 +589,8 @@ out:
 	return ret;
 
 err:
-	IONMSG("%s sync err:%d|k%d|hdl:%d-%p|addr:0x%lx|iova:0x%llx|sz:%d|clt:%s\n"
-	       , __func__, sync_type, from_kernel,
+	IONMSG("%s sync err:%d|k%d|hdl:%d-%p|addr:0x%lx|iova:0x%llx|sz:%d|%s\n",
+	       __func__, sync_type, from_kernel,
 	       param->handle, param->kernel_handle,
 	       (unsigned long)param->va, param->iova, param->size,
 	       (*client->dbg_name) ? client->dbg_name : client->name);

@@ -27,4 +27,5 @@
 #include <linux/device.h>
 #include <linux/leds.h>
 
+extern unsigned int __attribute__((weak)) delay_uiready;
 #endif /* _OPPO_DISPLAY_PRIVATE_API_H_ */

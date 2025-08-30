@@ -3,7 +3,9 @@
 
 CFG_FM_CHIP := mt6631
 CFG_FM_PLAT := $(CFG_FM_CHIP)
-CFG_FM_CHIP_ID = 6785
+CFG_FM_CHIP_ID := 6785
+CFG_BUILD_CONNAC2 := false
+M := false
 
 $(info [fm_drv:Makefile] M = $(M))
 $(info [fm_drv:Makefile] FM_CHIP_ID = $(FM_CHIP_ID))

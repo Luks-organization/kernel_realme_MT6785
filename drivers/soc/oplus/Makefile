@@ -1,1 +1,10 @@
-obj-y  +=  healthinfo/
+obj-y += healthinfo/
+obj-y += device_info/
+obj-y += oplus_custom/
+obj-y += oplus_project/
+obj-y += oplus_als_cali_value/
+obj-y += game_opt/
+obj-y += svelte/
+obj-y += cmdline_parser/
+obj-y += misc/
+obj-y += oplus_pmic_monitor_mtk/
