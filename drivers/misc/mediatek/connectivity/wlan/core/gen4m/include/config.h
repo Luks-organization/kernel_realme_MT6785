@@ -1570,14 +1570,13 @@
  *       COUNTRY_CHANNEL_TXPOWER_LIMIT_TYPE_COMP_11AC_V2
  *------------------------------------------------------------------------------
  */
-#ifdef OPLUS_BUG_STABILITY
+
 // Chenguohua@CONNECTIVITY.WIFI.BASIC, 2022/02/11, Power Limit for diff wifi standard
 #ifndef CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING
 #define CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING    0 /*move to wlan/MAKEFILE */
 #endif
 #else
-#define CFG_SUPPORT_DYNA_TX_PWR_CTRL_11AC_V2_SETTING    0
-#endif /* OPLUS_BUG_STABILITY */
+#define CFG_SUPPORT_DYNA_TX_PWR_CTRL_OFDM_SETTING 1
 
 /*------------------------------------------------------------------------------
  * tx power control:
