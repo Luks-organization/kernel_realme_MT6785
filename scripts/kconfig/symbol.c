@@ -80,7 +80,7 @@ const char *sym_type_name(enum symbol_type type)
 {
 	switch (type) {
 	case S_BOOLEAN:
-		return "bool";
+		return "boolean";
 	case S_TRISTATE:
 		return "tristate";
 	case S_INT:
