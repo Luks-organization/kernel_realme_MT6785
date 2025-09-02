@@ -1123,7 +1123,7 @@ void set_all_choice_values(struct symbol *csym)
 bool conf_set_all_new_symbols(enum conf_def_mode mode)
 {
 	struct symbol *sym, *csym;
-	int i, cnt, pby, pty, ptm;	/* pby: probability of bool     = y
+	int i, cnt, pby, pty, ptm;	/* pby: probability of boolean  = y
 					 * pty: probability of tristate = y
 					 * ptm: probability of tristate = m
 					 */

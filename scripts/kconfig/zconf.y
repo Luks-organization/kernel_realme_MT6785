@@ -639,7 +639,7 @@ static void print_symbol(FILE *out, struct menu *menu)
 		fprintf(out, "\nconfig %s\n", sym->name);
 	switch (sym->type) {
 	case S_BOOLEAN:
-		fputs("  bool\n", out);
+		fputs("  boolean\n", out);
 		break;
 	case S_TRISTATE:
 		fputs("  tristate\n", out);
