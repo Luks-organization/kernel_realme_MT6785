@@ -48,14 +48,6 @@ function compile_kernel() {
         ARCH=arm64 \
         CC="clang" \
         LLVM=1 \
-        LD=ld.lld \
-        AR=llvm-ar \
-        NM=llvm-nm \
-        STRIP=llvm-strip \
-        OBJCOPY=llvm-objcopy \
-        OBJDUMP=llvm-objdump \
-        CROSS_COMPILE="${PWD}/clang/bin/aarch64-linux-gnu-" \
-        CROSS_COMPILE_ARM32="${PWD}/clang/bin/arm-linux-gnueabi-" \
         CONFIG_NO_ERROR_ON_MISMATCH=y \
         2>&1 | tee error.log || error_exit "Kernel build failed. Check error.log"
 }
@@ -74,7 +66,6 @@ function zip_kernel() {
     cp "$KERNEL_IMAGE" AnyKernel || error_exit "Failed to copy kernel image"
     cd AnyKernel || exit
     zip -r9 4.14.456-Openela-KERNEL-${DATE}-salaa.zip * || error_exit "Zipping failed"
-    make clean && make mrproper
     log "Kernel zip created: AnyKernel/4.14.456-Openela-KERNEL-${DATE}-salaa.zip"
 }
 
