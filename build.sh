@@ -39,6 +39,9 @@ function compile_kernel() {
     export ARCH=arm64
     export KBUILD_BUILD_USER="LUKS"
     export KBUILD_BUILD_HOST="android-build-mtk"
+    export AR=llvm-ar
+    export NM=llvm-nm
+    export OBJCOPY=llvm-objcopy
 
     make O=out ARCH=arm64 salaa_defconfig
 
