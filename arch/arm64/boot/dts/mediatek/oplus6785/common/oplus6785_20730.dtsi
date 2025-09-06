@@ -15,6 +15,8 @@
 };
 //#ifdef OPLUS_FEATURE_TP_BASIC
 &spi3 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	novatek@0 {
                 compatible = "novatek,nf_nt36672c";
 		reg = <0>;
@@ -72,6 +74,8 @@
 
 //#endif OPLUS_FEATURE_TP_BASIC
 &i2c2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	clock-frequency = <400000>;
 
 	mtk-usb@60 {
@@ -81,6 +85,8 @@
 	};
 };
 &i2c0 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	status = "okay";
 	focaltech@38 {
 		status = "okay";
@@ -1013,6 +1019,8 @@
 
 //#ifdef OPLUS_BUG_STABILITY
 &i2c6 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	aw882xx_evt1: aw882xx_evt1@35 {
 		compatible = "awinic,aw882xx_smartpa";
 		reg = <0x35>;
@@ -1045,6 +1053,8 @@
 //#ifdef OPLUS_FEATURE_NFC_BRINGUP
 //LinJunBin@CONNECTIVITY.NFC.BASIC , 2020/09/19, add for : add NXP devices
 &i2c3 {
+       #address-cells = <1>;
+       #size-cells = <0>;
        status = "okay";
        nfc_nxp@28 {
                compatible = "nxp,pn544";
@@ -1447,6 +1457,8 @@ gpio_goodix_cs_func: gpio_goodix_cs_func {
 };
 
 &i2c6 {
+	#address-cells = <1>;
+	#size-cells = <0>;
         fan53870@20 {
                 compatible = "fan53870";
                 reg = <0x20>;

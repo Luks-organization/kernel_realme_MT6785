@@ -208,6 +208,8 @@
 };
 
 &i2c7 {
+	#address-cells = <1>;
+	#size-cells = <0>;
 	status = "okay";
 	clock-frequency = <100000>;
 	bq27541-battery@55 {
@@ -522,6 +524,8 @@
 };
 
 &i2c6 {
+	#address-cells = <1>;
+	#size-cells = <0>;
         fan53870@35 {
                 compatible = "fan53870";
                 reg = <0x35>;
