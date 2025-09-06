@@ -106,11 +106,11 @@ n	[A-Za-z0-9_-]
 		current_pos.file = current_file;
 		current_pos.lineno = current_file->lineno;
 		if (id && id->flags & TF_COMMAND) {
-			yylval.id = id;
+			zconflval.id = id;
 			return id->token;
 		}
 		alloc_string(yytext, yyleng);
-		yylval.string = text;
+		zconflval.string = text;
 		return T_WORD;
 	}
 	.	warn_ignored_character(*yytext);
@@ -142,11 +142,11 @@ n	[A-Za-z0-9_-]
 	({n}|[/.])+	{
 		const struct kconf_id *id = kconf_id_lookup(yytext, yyleng);
 		if (id && id->flags & TF_PARAM) {
-			yylval.id = id;
+			zconflval.id = id;
 			return id->token;
 		}
 		alloc_string(yytext, yyleng);
-		yylval.string = text;
+		zconflval.string = text;
 		return T_WORD;
 	}
 	#.*	/* comment */
@@ -161,7 +161,7 @@ n	[A-Za-z0-9_-]
 <STRING>{
 	[^'"\\\n]+/\n	{
 		append_string(yytext, yyleng);
-		yylval.string = text;
+		zconflval.string = text;
 		return T_WORD_QUOTE;
 	}
 	[^'"\\\n]+	{
@@ -169,7 +169,7 @@ n	[A-Za-z0-9_-]
 	}
 	\\.?/\n	{
 		append_string(yytext + 1, yyleng - 1);
-		yylval.string = text;
+		zconflval.string = text;
 		return T_WORD_QUOTE;
 	}
 	\\.?	{
@@ -178,15 +178,13 @@ n	[A-Za-z0-9_-]
 	\'|\"	{
 		if (str == yytext[0]) {
 			BEGIN(PARAM);
-			yylval.string = text;
+			zconflval.string = text;
 			return T_WORD_QUOTE;
 		} else
 			append_string(yytext, 1);
 	}
 	\n	{
-		fprintf(stderr,
-			"%s:%d:warning: multi-line strings not supported\n",
-			zconf_curname(), zconf_lineno());
+		printf("%s:%d:warning: multi-line strings not supported\n", zconf_curname(), zconf_lineno());
 		current_file->lineno++;
 		BEGIN(INITIAL);
 		return T_EOL;
@@ -265,7 +263,7 @@ void zconf_starthelp(void)
 
 static void zconf_endhelp(void)
 {
-	yylval.string = text;
+	zconflval.string = text;
 	BEGIN(INITIAL);
 }
 
@@ -298,7 +296,7 @@ void zconf_initscan(const char *name)
 {
 	yyin = zconf_fopen(name);
 	if (!yyin) {
-		fprintf(stderr, "can't find file %s\n", name);
+		printf("can't find file %s\n", name);
 		exit(1);
 	}
 
@@ -319,8 +317,8 @@ void zconf_nextfile(const char *name)
 	current_buf->state = YY_CURRENT_BUFFER;
 	yyin = zconf_fopen(file->name);
 	if (!yyin) {
-		fprintf(stderr, "%s:%d: can't open file \"%s\"\n",
-			zconf_curname(), zconf_lineno(), file->name);
+		printf("%s:%d: can't open file \"%s\"\n",
+		    zconf_curname(), zconf_lineno(), file->name);
 		exit(1);
 	}
 	yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
@@ -329,21 +327,20 @@ void zconf_nextfile(const char *name)
 
 	for (iter = current_file->parent; iter; iter = iter->parent ) {
 		if (!strcmp(current_file->name,iter->name) ) {
-			fprintf(stderr,
-				"%s:%d: recursive inclusion detected. "
-				"Inclusion path:\n  current file : '%s'\n",
-				zconf_curname(), zconf_lineno(),
-				zconf_curname());
+			printf("%s:%d: recursive inclusion detected. "
+			       "Inclusion path:\n  current file : '%s'\n",
+			       zconf_curname(), zconf_lineno(),
+			       zconf_curname());
 			iter = current_file->parent;
 			while (iter && \
 			       strcmp(iter->name,current_file->name)) {
-				fprintf(stderr, "  included from: '%s:%d'\n",
-					iter->name, iter->lineno-1);
+				printf("  included from: '%s:%d'\n",
+				       iter->name, iter->lineno-1);
 				iter = iter->parent;
 			}
 			if (iter)
-				fprintf(stderr, "  included from: '%s:%d'\n",
-					iter->name, iter->lineno+1);
+				printf("  included from: '%s:%d'\n",
+				       iter->name, iter->lineno+1);
 			exit(1);
 		}
 	}

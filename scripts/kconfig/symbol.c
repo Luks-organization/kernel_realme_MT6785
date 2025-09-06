@@ -909,10 +909,6 @@ const char *sym_expand_string_value(const char *in)
 	char *res;
 	size_t reslen;
 
-	/*
-	 * Note: 'in' might come from a token that's about to be
-	 * freed, so make sure to always allocate a new string
-	 */
 	reslen = strlen(in) + 1;
 	res = xmalloc(reslen);
 	res[0] = '\0';
@@ -1225,7 +1221,7 @@ static struct symbol *sym_check_expr_deps(struct expr *e)
 	default:
 		break;
 	}
-	fprintf(stderr, "Oops! How to check %d?\n", e->type);
+	printf("Oops! How to check %d?\n", e->type);
 	return NULL;
 }
 
