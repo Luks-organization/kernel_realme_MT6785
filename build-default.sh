@@ -1,42 +1,82 @@
 #!/bin/bash
+set -euo pipefail
+IFS=$'\n\t'
 
-# Copyright (C) 2024 psionicprjkt
+# Colors for output
+GREEN="\033[0;32m"
+RED="\033[0;31m"
+NC="\033[0m" # No Color
 
-compile_kernel() {
-    # compile_kernel
+function log() {
+    echo -e "${GREEN}[*] $1${NC}"
+}
+
+function error_exit() {
+    echo -e "${RED}[!] $1${NC}" >&2
+    exit 1
+}
+
+function download_toolchains() {
+    log "Downloading and setting up toolchains..."
+
+    if [ ! -d "clang" ]; then
+        wget -q https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r547379.tar.gz -O clang.tar.gz \
+            && mkdir clang \
+            && tar -xf clang.tar.gz -C clang \
+            && rm -f clang.tar.gz || error_exit "Failed to download or extract clang."
+    fi
+}
+
+function compile_kernel() {
+    log "Starting kernel compilation..."
+
+    make clean && make mrproper
+    rm -rf out AnyKernel
+    mkdir -p out
+
+    source ~/.bashrc || true
+    source ~/.profile || true
+
+    export LC_ALL=C
+    export USE_CCACHE=1
     export ARCH=arm64
+    export KBUILD_BUILD_USER="LUKS"
+    export KBUILD_BUILD_HOST="android-build-mtk"
     make O=out ARCH=arm64 salaa_defconfig
 
-    # Generate profile data during the first compilation
-    PATH="${PWD}/clang/bin:${PWD}/arm64:${PWD}/arm32:${PATH}" \
-    make -j"$(nproc --all)" O=out \
-        LLVM=1 \
-        LLVM_IAS=1 \
+    PATH="${PWD}/clang/bin:${PATH}" \
+
+    make -j$(nproc --all) O=out \
         ARCH=arm64 \
         CC="clang" \
         LD=ld.lld \
-        STRIP=llvm-strip \
-        AS=llvm-as \
-        AR=llvm-ar \
-        NM=llvm-nm \
-        OBJCOPY=llvm-objcopy \
-        OBJDUMP=llvm-objdump \
-        CLANG_TRIPLE=aarch64-linux-gnu- \
-        CROSS_COMPILE="${PWD}/arm64/aarch64-linux-android-" \
-        CROSS_COMPILE_ARM32="${PWD}/arm32/arm-linux-androideabi-" \
+        LLVM=1 \
         CONFIG_NO_ERROR_ON_MISMATCH=y \
-        CFLAGS="-Wno-pragma-messages"
+        2>&1 | tee error.log || error_exit "Kernel build failed. Check error.log"
 }
 
-setup_kernel_release() {
-    # setup_kernel_release
-    v=$(cat version)
-    d=$(date "+%d%m%Y")
-    z="4.14.456-Salaa-Kernel-$d-$v.zip"
-    wget --quiet https://psionicprjkt.my.id/assets/files/AK3-sala.zip && unzip AK3-sala
-    cp out/arch/arm64/boot/Image.gz-dtb AnyKernel && cd AnyKernel
-    zip -r9 "$z" *
+function zip_kernel() {
+    log "Zipping kernel..."
+
+    DATE=$(date "+%d%m%Y")
+    KERNEL_IMAGE="out/arch/arm64/boot/Image.gz-dtb"
+
+    if [ ! -f "$KERNEL_IMAGE" ]; then
+        error_exit "Kernel image not found at $KERNEL_IMAGE"
+    fi
+
+    git clone --depth=1 https://github.com/Luks-organization/AnyKernel3 AnyKernel || error_exit "Failed to clone AnyKernel3"
+    cp "$KERNEL_IMAGE" AnyKernel || error_exit "Failed to copy kernel image"
+    cd AnyKernel || exit
+    zip -r9 4.14.456-Openela-KERNEL-${DATE}-salaa.zip * || error_exit "Zipping failed"
+    log "Kernel zip created: AnyKernel/4.14.456-Openela-KERNEL-${DATE}-salaa.zip"
 }
 
-compile_kernel
-setup_kernel_release
+function main() {
+    log "On upstream-xx branch"
+    download_toolchains
+    compile_kernel
+    zip_kernel
+}
+
+main "$@"
