@@ -186,3 +186,6 @@ obj-$(CONFIG_TEE)		+= tee/
 obj-$(CONFIG_MULTIPLEXER)	+= mux/
 obj-$(CONFIG_TRUSTY)	+= trusty/
 obj-$(CONFIG_GNSS)		+= gnss/
+
+# Lindroid
+obj-$(CONFIG_DRM_LINDROID_EVDI) += lindroid-drm-loopback/
