@@ -39,7 +39,6 @@ enum {
 	FPSGO_SYSTRACE_LIST(GENERATE_ENUM)
 };
 
-#ifdef CONFIG_TRACING
 #define FPSFO_DECLARE_SYSTRACE(prefix, name) \
 	extern struct tracepoint __tracepoint_##name; \
 	int prefix##_reg_trace_##name(void *probe, void *data) \
@@ -52,7 +51,6 @@ enum {
 		return tracepoint_probe_unregister( \
 			&__tracepoint_##name, (void *)probe, data); \
 	}
-#endif
 
 extern uint32_t fpsgo_systrace_mask;
 extern struct dentry *fpsgo_debugfs_dir;
