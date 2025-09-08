@@ -1454,8 +1454,6 @@ static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 
 extern const_debug unsigned int sysctl_sched_features;
 
-extern const_debug unsigned int sysctl_sched_features;
-
 #define SCHED_FEAT(name, enabled)	\
 	__SCHED_FEAT_##name ,
 
