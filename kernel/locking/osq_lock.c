@@ -140,11 +140,21 @@ bool osq_lock(struct optimistic_spin_queue *lock)
  	 * is implemented with a monitor-wait. vcpu_is_preempted() relies on
  	 * polling, be careful.
  	 */
- 	if (smp_cond_load_relaxed(&node->locked, VAL || need_resched() ||
- 				  vcpu_is_preempted(node_cpu(node->prev))))
- 		return true;
 
-	/* unqueue */
+	while (!READ_ONCE(node->locked)) {
+		/*
+		 * If we need to reschedule bail... so we can block.
+		 * Use vcpu_is_preempted() to avoid waiting for a preempted
+		 * lock holder:
+		 */
+		if (need_resched() || vcpu_is_preempted(node_cpu(node->prev)))
+			goto unqueue;
+
+		cpu_relax();
+	}
+	return true;
+
+unqueue:
 	/*
 	 * Step - A  -- stabilize @prev
 	 *

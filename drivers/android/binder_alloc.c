@@ -362,7 +362,7 @@ static bool debug_low_async_space_locked(struct binder_alloc *alloc, int pid)
 	struct binder_buffer *buffer;
 	size_t total_alloc_size = 0;
 	size_t num_buffers = 0;
-        struct task_struct __maybe_unused *debug_task;
+	struct task_struct *debug_task;
 
 	for (n = rb_first(&alloc->allocated_buffers); n != NULL;
 		 n = rb_next(n)) {
