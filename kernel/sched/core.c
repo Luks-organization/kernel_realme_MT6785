@@ -4616,7 +4616,7 @@ static noinline void __schedule_bug(struct task_struct *prev)
 {
 	/* Save this before calling printk(), since that will clobber it */
 	unsigned long preempt_disable_ip = get_preempt_disable_ip(current);
-	int i = 0;
+
 	if (oops_in_progress)
 		return;
 
@@ -4631,14 +4631,9 @@ static noinline void __schedule_bug(struct task_struct *prev)
 	    && in_atomic_preempt_off()) {
 		pr_err("Preemption disabled at:");
 		print_ip_sym(preempt_disable_ip);
-		dump_preempt_disable_ips(current);
 		pr_cont("\n");
 	}
-	check_panic_on_warn("scheduling while atomic");
-
-	dump_stack();
-	add_taint(TAINT_WARN, LOCKDEP_STILL_OK);
-	BUG_ON(1);
+	panic("scheduling while atomic\n");
 }
 
 /*
