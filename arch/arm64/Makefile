@@ -85,6 +85,9 @@ ifeq ($(CONFIG_COMPAT_VDSO), y)
   endif
 endif
 
+# Optimize for CPU - CLANG
+KBUILD_CFLAGS   += $(call cc-option,-march=armv8-a+crypto+crc,) $(call cc-option,-mcpu=cortex-a55+crypto+crc,)
+
 ifeq ($(cc-name),clang)
 # This is a workaround for https://bugs.llvm.org/show_bug.cgi?id=30792.
 # TODO: revert when this is fixed in LLVM.
@@ -128,24 +131,6 @@ LDFLAGS		+= -maarch64elf
 endif
 UTS_MACHINE	:= aarch64
 endif
-
-ifeq ($(cc-name),clang)
-# Optimize for CPU - CLANG
-KBUILD_CFLAGS += $(call cc-option,-march=armv8-a+crypto+crc,) $(call cc-option,-mcpu=cortex-a55+crypto+crc,)
-
-# Cortex-A55 optimizations
-arch-$(CONFIG_ARCH_MT6785)  := $(call cc-option,-mcpu=cortex-a55+crc+crypto,-march=armv8-a+crc+crypto)
-tune-$(CONFIG_ARCH_MT6785)  := -mtune=cortex-a55
-else
-# Optimize for CPU - GCC
-KBUILD_CFLAGS += $(call cc-option,-march=armv8-a+crypto+crc,) $(call cc-option,-mcpu=cortex-a76.cortex-a55+crypto+crc,)
-
-# Cortex-A76.A55 optimizations
-arch-$(CONFIG_ARCH_MT6785)  := $(call cc-option,-mcpu=cortex-a76.cortex-a55+crc+crypto,-march=armv8-a+crc+crypto)
-tune-$(CONFIG_ARCH_MT6785)  := -mtune=cortex-a76.cortex-a55
-endif
-KBUILD_CFLAGS += $(arch-y) $(tune-y)
-KBUILD_AFLAGS += $(arch-y) $(tune-y)
 
 CHECKFLAGS	+= -D__aarch64__ -m64
 
