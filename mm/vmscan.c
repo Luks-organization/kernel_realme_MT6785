@@ -62,7 +62,9 @@
 #define CREATE_TRACE_POINTS
 #include <trace/events/vmscan.h>
 
-
+#if defined(OPLUS_FEATURE_ZRAM_OPT) && defined(CONFIG_FG_TASK_UID)
+#include <linux/healthinfo/fg.h>
+#endif /*OPLUS_FEATURE_ZRAM_OPT*/
 #include <trace/hooks/vh_vmscan.h>
 
 
@@ -173,9 +175,15 @@ unsigned long sysctl_clean_low_kbytes __read_mostly = CONFIG_CLEAN_LOW_KBYTES;
 unsigned long sysctl_clean_min_kbytes __read_mostly = CONFIG_CLEAN_MIN_KBYTES;
 
 /*
- * From 0 .. 100.  Higher means more swappy.
+ * From 0 .. 200.  Higher means more swappy.
  */
 int vm_swappiness = 60;
+#if defined(OPLUS_FEATURE_ZRAM_OPT) && defined(CONFIG_OPLUS_ZRAM_OPT)
+/*
+ * Direct reclaim swappiness, exptct 0 - 60. Higher means more swappy and slower.
+ */
+int direct_vm_swappiness = 60;
+#endif /*OPLUS_FEATURE_ZRAM_OPT*/
 
 #ifdef CONFIG_DYNAMIC_TUNNING_SWAPPINESS
 int vm_swappiness_threshold1 = 0;
@@ -1852,6 +1860,14 @@ putback_inactive_pages(struct lruvec *lruvec, struct list_head *page_list)
  */
 static int current_may_throttle(void)
 {
+#if defined(OPLUS_FEATURE_ZRAM_OPT) && defined(CONFIG_OPLUS_ZRAM_OPT)
+	if ((current->signal->oom_score_adj < 0)
+#ifdef CONFIG_FG_TASK_UID
+		|| is_fg(current_uid().val)
+#endif
+	   )
+		return 0;
+#endif /*OPLUS_FEATURE_ZRAM_OPT*/
 	return !(current->flags & PF_LESS_THROTTLE) ||
 		current->backing_dev_info == NULL ||
 		bdi_write_congested(current->backing_dev_info);
@@ -2250,8 +2266,13 @@ static bool inactive_list_is_low(struct lruvec *lruvec, bool file,
 		inactive_ratio = 0;
 	} else {
 		gb = (inactive + active) >> (30 - PAGE_SHIFT);
+#if defined(OPLUS_FEATURE_ZRAM_OPT) && defined(CONFIG_OPLUS_ZRAM_OPT)
+		if (file && gb)
+			inactive_ratio = min(2UL, int_sqrt(10 * gb));
+#else
 		if (gb)
 			inactive_ratio = int_sqrt(10 * gb);
+#endif /*OPLUS_FEATURE_ZRAM_OPT*/
 		else
 			inactive_ratio = 1;
 	}
@@ -2325,54 +2346,6 @@ static bool swap_is_allowed(void)
 }
 #endif
 
-static void prepare_workingset_protection(pg_data_t *pgdat, struct scan_control *sc)
-{
-	/*
-	 * Check the number of anonymous pages to protect them from
-	 * reclaiming if their amount is below the specified.
-	 */
-	if (sysctl_anon_min_kbytes) {
-		unsigned long reclaimable_anon;
-
-		reclaimable_anon =
-			node_page_state(pgdat, NR_ACTIVE_ANON) +
-			node_page_state(pgdat, NR_INACTIVE_ANON) +
-			node_page_state(pgdat, NR_ISOLATED_ANON);
-		reclaimable_anon <<= (PAGE_SHIFT - 10);
-
-		sc->anon_below_min = reclaimable_anon < sysctl_anon_min_kbytes;
-	} else
-		sc->anon_below_min = 0;
-
-	/*
-	 * Check the number of clean file pages to protect them from
-	 * reclaiming if their amount is below the specified.
-	 */
-	if (sysctl_clean_low_kbytes || sysctl_clean_min_kbytes) {
-		unsigned long reclaimable_file, dirty, clean;
-
-		reclaimable_file =
-			node_page_state(pgdat, NR_ACTIVE_FILE) +
-			node_page_state(pgdat, NR_INACTIVE_FILE) +
-			node_page_state(pgdat, NR_ISOLATED_FILE);
-		dirty = node_page_state(pgdat, NR_FILE_DIRTY);
-		/*
-		 * node_page_state() sum can go out of sync since
-		 * all the values are not read at once.
-		 */
-		if (likely(reclaimable_file > dirty))
-			clean = (reclaimable_file - dirty) << (PAGE_SHIFT - 10);
-		else
-			clean = 0;
-
-		sc->clean_below_low = clean < sysctl_clean_low_kbytes;
-		sc->clean_below_min = clean < sysctl_clean_min_kbytes;
-	} else {
-		sc->clean_below_low = 0;
-		sc->clean_below_min = 0;
-	}
-}
-
 enum scan_balance {
 	SCAN_EQUAL,
 	SCAN_FRACT,
@@ -2394,7 +2367,8 @@ static void get_scan_count(struct lruvec *lruvec, struct mem_cgroup *memcg,
 			   struct scan_control *sc, unsigned long *nr,
 			   unsigned long *lru_pages)
 {
-	int swappiness = mem_cgroup_swappiness(memcg);
+	/* int swappiness = mem_cgroup_swappiness(memcg);*/
+	int swappiness = vm_swappiness;
 	struct zone_reclaim_stat *reclaim_stat = &lruvec->reclaim_stat;
 	u64 fraction[2];
 	u64 denominator = 0;	/* gcc */
@@ -2405,8 +2379,6 @@ static void get_scan_count(struct lruvec *lruvec, struct mem_cgroup *memcg,
 	unsigned long ap, fp;
 	enum lru_list lru;
 
-	/* use vm_swappiness defaultly */
-	swappiness = vm_swappiness;
 #ifdef CONFIG_DYNAMIC_TUNNING_SWAPPINESS
 	if (current_is_kswapd()) {
 		unsigned long nr_file_pages =
@@ -2425,11 +2397,15 @@ static void get_scan_count(struct lruvec *lruvec, struct mem_cgroup *memcg,
 	}
 #endif
 
-	prepare_workingset_protection(pgdat, sc);
-
-
+#if defined(OPLUS_FEATURE_ZRAM_OPT) && defined(CONFIG_OPLUS_ZRAM_OPT)
+	if (!current_is_kswapd()) {
+		swappiness = direct_vm_swappiness;
+	}
+	if (!sc->may_swap || (mem_cgroup_get_nr_swap_pages(memcg) <= totalswap>>6)) {
+#else
 	/* If we have no swap space, do not bother scanning anon pages. */
 	if (!sc->may_swap || mem_cgroup_get_nr_swap_pages(memcg) <= 0) {
+#endif /*OPLUS_FEATURE_ZRAM_OPT*/
 		scan_balance = SCAN_FILE;
 		goto out;
 	}
@@ -4387,3 +4363,114 @@ void check_move_unevictable_pages(struct page **pages, int nr_pages)
 }
 #endif /* CONFIG_SHMEM */
 
+#ifdef CONFIG_HYBRIDSWAP_SWAPD
+#define PARA_BUF_LEN 128
+
+static inline bool debug_get_val(char *buf, char *token, unsigned long *val)
+{
+	int ret = -EINVAL;
+	char *str = strstr(buf, token);
+
+	if (!str)
+		return ret;
+
+	ret = kstrtoul(str + strlen(token), 0, val);
+	if (ret)
+		return -EINVAL;
+
+	if (*val > 200) {
+		pr_err("%lu is invalid\n", *val);
+		return -EINVAL;
+	}
+
+	return 0;
+}
+
+static ssize_t swappiness_para_write(struct file *file,
+		const char __user *buff, size_t len, loff_t *ppos)
+{
+	char kbuf[PARA_BUF_LEN] = {'0'};
+	char *str;
+	long val;
+
+	if (len > PARA_BUF_LEN - 1) {
+		pr_err("len %d is too long\n", len);
+		return -EINVAL;
+	}
+
+	if (copy_from_user(&kbuf, buff, len))
+		return -EFAULT;
+	kbuf[len] = '\0';
+
+	str = strstrip(kbuf);
+	if (!str) {
+		pr_err("buff %s is invalid\n", kbuf);
+		return -EINVAL;
+	}
+
+	if (!debug_get_val(str, "vm_swappiness=", &val)) {
+		vm_swappiness = val;
+		return len;
+	}
+
+	if (!debug_get_val(str, "direct_swappiness=", &val)) {
+		direct_vm_swappiness = val;
+		return len;
+	}
+
+	if (!debug_get_val(str, "swapd_swappiness=", &val)) {
+		hybridswapd_swappiness = val;
+		return len;
+	}
+
+	return -EINVAL;
+}
+
+static ssize_t swappiness_para_read(struct file *file,
+		char __user *buffer, size_t count, loff_t *off)
+{
+	char kbuf[PARA_BUF_LEN] = {'0'};
+	int len;
+
+	len = snprintf(kbuf, PARA_BUF_LEN, "vm_swappiness: %d\n", vm_swappiness);
+	len += snprintf(kbuf + len, PARA_BUF_LEN - len,
+			"direct_swappiness: %d\n", direct_vm_swappiness);
+	len += snprintf(kbuf + len, PARA_BUF_LEN - len,
+			"swapd_swappiness: %d\n", hybridswapd_swappiness);
+
+	if (len == PARA_BUF_LEN)
+		kbuf[len - 1] = '\0';
+
+	if (len > *off)
+		len -= *off;
+	else
+		len = 0;
+
+	if (copy_to_user(buffer, kbuf + *off, (len < count ? len : count)))
+		return -EFAULT;
+
+	*off += (len < count ? len : count);
+	return (len < count ? len : count);
+}
+
+static const struct file_operations proc_swappiness_para_ops = {
+	.write          = swappiness_para_write,
+	.read		= swappiness_para_read,
+};
+
+int create_swappiness_para_proc(void)
+{
+	struct proc_dir_entry * para_entry =
+		proc_create("oplus_healthinfo/swappiness_para",
+				S_IRUSR|S_IWUSR, NULL, &proc_swappiness_para_ops);
+
+	if (para_entry) {
+		printk("Register swappiness_para interface passed.\n");
+		return 0;
+	}
+
+	pr_err("Register swappiness_para interface failed.\n");
+	return -ENOMEM;
+}
+EXPORT_SYMBOL(create_swappiness_para_proc);
+#endif
