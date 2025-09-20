@@ -73,7 +73,7 @@ ccflags-y += -DWLAN_INCLUDE_PROC
 ccflags-y += -DCFG_SUPPORT_AGPS_ASSIST=0
 ccflags-y += -DCFG_SUPPORT_TSF_USING_BOOTTIME=1
 ccflags-y += -DARP_MONITER_ENABLE=1
-ccflags-y += $(call cc-disable-warning, unused-but-set-variable)
+ccflags-y += -Werror $(call cc-disable-warning, unused-but-set-variable)
 #ccflags-y:=$(filter-out -U$(WLAN_CHIP_ID),$(ccflags-y))
 #ccflags-y += -DLINUX -D$(WLAN_CHIP_ID)
 #workaround: also needed for none LINUX system
@@ -375,7 +375,7 @@ else
     ccflags-y += -DCFG_WIFI_IP_SET=1
 endif
 
-ifeq ($(CONFIG_WLAN_DRV_BUILD_IN),y)
+ifneq ($(filter MTK_WCN_REMOVE_KERNEL_MODULE,$(KBUILD_SUBDIR_CCFLAGS)),)
     ccflags-y += -DCFG_BUILT_IN_DRIVER=1
 else
     ccflags-y += -DCFG_BUILT_IN_DRIVER=0
@@ -499,9 +499,8 @@ else
 ccflags-y += -DCFG_SUPPORT_NAN=0
 endif
 
-MODULE_NAME := wlan_drv_gen4m
 ifeq ($(MODULE_NAME),)
-MODULE_NAME := wlan_$(shell echo $(strip $(WLAN_CHIP_ID)) | tr A-Z a-z)_$(CONFIG_MTK_COMBO_WIFI_HIF)
+MODULE_NAME := wlan_drv_gen4m
 endif
 
 ccflags-y += -DDBG=0

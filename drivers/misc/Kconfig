@@ -549,6 +549,19 @@ config OPLUS_FEATURE_SDCARD
 	help
 	  Say Y here to use ldo5 in mt6360 for sdcard
 
+#ifdef OPLUS_FEATURE_TP_BASIC
+config SIM_DETECT
+	tristate "SIM_DETECT system"
+	default n
+	help
+	  Say Y here to enable sim detect system support
+
+config HAPTIC_FEEDBACK
+    tristate "Haptic driver feedback for awinic aw8697 series"
+    help
+      This option enables support for aw8697 series Haptic Driver Feedback.
+#endif /* OPLUS_FEATURE_TP_BASIC */
+
 source "drivers/misc/c2port/Kconfig"
 source "drivers/misc/eeprom/Kconfig"
 source "drivers/misc/cb710/Kconfig"
@@ -561,11 +574,10 @@ source "drivers/misc/mic/Kconfig"
 source "drivers/misc/genwqe/Kconfig"
 source "drivers/misc/echo/Kconfig"
 source "drivers/misc/cxl/Kconfig"
+source "drivers/misc/cardreader/Kconfig"
 source "drivers/misc/mediatek/Kconfig"
 #ifdef CONFIG_OPLUS_TRIKEY_HALL
 source "drivers/misc/tri_state_key/Kconfig"
 #endif CONFIG_OPLUS_TRIKEY_HALL
-#ifdef OPLUS_FEATURE_CHG_BASIC//Fanhong.Kong@ProDrv.CHG,add 2018/10/25 for vib aw8697
 source "drivers/misc/aw8697_haptic/Kconfig"
-#endif
 endmenu
