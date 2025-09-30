@@ -268,49 +268,55 @@ void aee_oops_free(struct aee_oops *oops);
 #define AEE_API_CALL_INTERVAL   (120 * HZ)
 #define AEE_API_CALL_BURST      2
 
-#define aee_kernel_exception(module, msg...)		\
-({							\
-	static DEFINE_RATELIMIT_STATE(__func__##_rs,	\
-			AEE_API_CALL_INTERVAL,		\
-			AEE_API_CALL_BURST);		\
-							\
-	if (__ratelimit(&(__func__##_rs)))		\
-		aee_kernel_exception_api_func(__FILE__, __LINE__,	\
-			DB_OPT_DEFAULT, module, msg);	\
-})
-#define aee_kernel_warning(module, msg...)		\
-({							\
-	static DEFINE_RATELIMIT_STATE(__func__##_rs,	\
-			AEE_API_CALL_INTERVAL,		\
-			AEE_API_CALL_BURST);		\
-							\
-	if (__ratelimit(&(__func__##_rs)))		\
-		aee_kernel_warning_api_func(__FILE__, __LINE__,	\
-			DB_OPT_DEFAULT, module, msg);		\
-})
+#ifndef aee_kernel_exception
+#define aee_kernel_exception(module, msg...)\
+	do {\
+		static DEFINE_RATELIMIT_STATE(__func__##_rs,\
+			AEE_API_CALL_INTERVAL,\
+			AEE_API_CALL_BURST);\
+		if (__ratelimit(&(__func__##_rs)))\
+			aee_kernel_exception_api_func(__FILE__, __LINE__,\
+				DB_OPT_DEFAULT, module, msg);\
+	} while (0)
+#endif
+#ifndef aee_kernel_warning
+#define aee_kernel_warning(module, msg...)\
+	do {\
+		static DEFINE_RATELIMIT_STATE(__func__##_rs,\
+			AEE_API_CALL_INTERVAL,\
+			AEE_API_CALL_BURST);\
+		if (__ratelimit(&(__func__##_rs)))\
+			aee_kernel_warning_api_func(__FILE__, __LINE__,\
+				DB_OPT_DEFAULT, module, msg);\
+	} while (0)
+#endif
 
-#define aee_kernel_exception_api(file, line, db_opt, module, msg...)	\
-({									\
-	static DEFINE_RATELIMIT_STATE(__func__##_rs,			\
-			AEE_API_CALL_INTERVAL,				\
-			AEE_API_CALL_BURST);				\
-	if (__ratelimit(&(__func__##_rs)))				\
-		aee_kernel_exception_api_func(__FILE__, __LINE__,	\
-			db_opt, module, msg);				\
-})
+#ifndef aee_kernel_exception_api
+#define aee_kernel_exception_api(file, line, db_opt, module, msg...)\
+	do {\
+		static DEFINE_RATELIMIT_STATE(__func__##_rs,\
+			AEE_API_CALL_INTERVAL,\
+			AEE_API_CALL_BURST);\
+		if (__ratelimit(&(__func__##_rs)))\
+			aee_kernel_exception_api_func(__FILE__, __LINE__,\
+				db_opt, module, msg);\
+	} while (0)
+#endif
 
-#define aee_kernel_warning_api(file, line, db_opt, module, msg...)	\
-({									\
-	static DEFINE_RATELIMIT_STATE(__func__##_rs,			\
-			AEE_API_CALL_INTERVAL,				\
-			AEE_API_CALL_BURST);				\
-	if (aee_is_printk_too_much(module))				\
-		aee_kernel_warning_api_func(__FILE__, __LINE__, db_opt,	\
-				module, msg);				\
-	else if (__ratelimit(&(__func__##_rs)))				\
-		aee_kernel_warning_api_func(__FILE__, __LINE__, db_opt,	\
-				module, msg);				\
-})
+#ifndef aee_kernel_warning_api
+#define aee_kernel_warning_api(file, line, db_opt, module, msg...)\
+	do {\
+		static DEFINE_RATELIMIT_STATE(__func__##_rs,\
+			AEE_API_CALL_INTERVAL,\
+			AEE_API_CALL_BURST);\
+		if (aee_is_printk_too_much(module))\
+			aee_kernel_warning_api_func(__FILE__, __LINE__, db_opt,\
+				module, msg);\
+		else if (__ratelimit(&(__func__##_rs)))\
+			aee_kernel_warning_api_func(__FILE__, __LINE__, db_opt,\
+				module, msg);\
+	} while (0)
+#endif
 
 #define aee_kernel_reminding(module, msg...)	\
 	aee_kernel_reminding_api(__FILE__, __LINE__, DB_OPT_DEFAULT,	\
