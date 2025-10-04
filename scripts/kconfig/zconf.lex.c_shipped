@@ -1,4 +1,3 @@
-
 #line 3 "scripts/kconfig/zconf.lex.c_shipped"
 
 #define  YY_INT_ALIGNED short int
