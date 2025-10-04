@@ -536,8 +536,6 @@ module_param(rcu_kick_kthreads, bool, 0644);
  */
 static ulong jiffies_till_sched_qs = HZ / 20;
 module_param(jiffies_till_sched_qs, ulong, 0644);
-static ulong jiffies_to_sched_qs; /* See adjust_jiffies_till_sched_qs(). */
-module_param(jiffies_to_sched_qs, ulong, 0444); /* Display only! */
 
 static bool rcu_start_gp_advanced(struct rcu_state *rsp, struct rcu_node *rnp,
 				  struct rcu_data *rdp);
