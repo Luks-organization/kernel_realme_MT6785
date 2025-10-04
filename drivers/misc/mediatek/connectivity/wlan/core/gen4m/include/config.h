@@ -1425,13 +1425,7 @@
  * in mtk_cfg80211_get_station
  *------------------------------------------------------------------------------
  */
-#ifndef OPLUS_WLAN_BUG_STABILITY
-//XuChuanye@CONNECTIVITY.WIFI.CONNECTION.CONNECT.2432753, 2019/10/16,
-//Modify for show max tx rate
-#define CFG_REPORT_MAX_TX_RATE	0
-#else  /* OPLUS_WLAN_BUG_STABILITY */
 #define CFG_REPORT_MAX_TX_RATE	1
-#endif /* OPLUS_WLAN_BUG_STABILITY */
 
 /*------------------------------------------------------------------------------
  * Link Quality Monitor

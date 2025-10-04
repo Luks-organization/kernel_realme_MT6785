@@ -40,7 +40,7 @@ function compile_kernel() {
     export KBUILD_BUILD_USER="LUKS"
     export KBUILD_BUILD_HOST="android-build-mtk"
 
-    make O=out ARCH=arm64 salaa_defconfig
+    make O=out ARCH=arm64 MT6785_defconfig
 
     PATH="${PWD}/clang/bin:${PATH}" \
 
