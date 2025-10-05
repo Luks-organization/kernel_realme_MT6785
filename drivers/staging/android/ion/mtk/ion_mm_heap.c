@@ -29,12 +29,12 @@
 #include <linux/sched/task.h>
 #include <linux/sched/signal.h>
 #include <linux/sched/clock.h>
-#include "mtk/mtk_ion.h"
+#include "mtk_ion.h"
+#include "ion_drv.h"
 #include "ion_profile.h"
 #include "ion_drv_priv.h"
 #include "ion_fb_heap.h"
 #include "ion_priv.h"
-#include "mtk/ion_drv.h"
 #include "ion_sec_heap.h"
 #include "aee.h"
 
@@ -2535,7 +2535,7 @@ long ion_mm_ioctl(struct ion_client *client, unsigned int cmd,
 			param.get_phys_param.phy_addr = phy_addr;
 
 			mutex_unlock(&buffer->lock);
-		} else if (buffer_type == ION_HEAP_TYPE_MULTIMEDIA_SEC) {
+                } else if ((enum mtk_ion_heap_type)buffer_type == ION_HEAP_TYPE_MULTIMEDIA_SEC) {
 			struct ion_heap *sec_heap;
 			ion_phys_addr_t phy_addr;
 			size_t len;
