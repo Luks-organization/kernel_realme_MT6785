@@ -319,6 +319,7 @@ ion_fd2sec_type(int fd, int *sec, int *iommu_sec_id,
 		ion_phys_addr_t *sec_hdl)
 {
 	enum TRUSTED_MEM_REQ_TYPE tmem_type = -1;
+	//struct ion_buffer *buffer;
 	struct ion_client *client;
 	struct ion_handle *handle;
 
@@ -646,7 +647,11 @@ void ion_sec_heap_dump_info(void)
 			     "client", "dbg_name", "pid", "size", "address");
 	ION_DUMP(NULL, "%s\n", seq_line);
 
+#ifdef OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK
+	if (!down_read_trylock(&dev->client_lock)) {
+#else /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 	if (!down_read_trylock(&dev->lock)) {
+#endif /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 		ION_DUMP(
 			 NULL,
 			 "detail trylock fail, alloc pid(%d-%d)\n",
@@ -694,7 +699,11 @@ void ion_sec_heap_dump_info(void)
 	}
 
 	if (need_dev_lock)
+#ifdef OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK
+		up_read(&dev->client_lock);
+#else /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 		up_read(&dev->lock);
+#endif /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 
 	ION_DUMP(NULL, "%s\n", seq_line);
 	ION_DUMP(
@@ -891,7 +900,11 @@ static int ion_sec_heap_debug_show(
 	ION_DUMP(s, "%16s %16zu\n", "2d-fr-sz:", fr_size);
 	ION_DUMP(s, "%s\n", seq_line);
 
+#ifdef OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK
+	down_read(&dev->client_lock);
+#else /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 	down_read(&dev->lock);
+#endif /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 
 	for (n = rb_first(&dev->clients); n; n = rb_next(n)) {
 		struct ion_client
@@ -939,7 +952,11 @@ static int ion_sec_heap_debug_show(
 			mutex_unlock(&client->lock);
 		}
 	}
+#ifdef OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK
+	up_read(&dev->client_lock);
+#else /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 	up_read(&dev->lock);
+#endif /* OPLUS_FEATURE_MTK_ION_SEPARATE_LOCK */
 
 	return 0;
 }
