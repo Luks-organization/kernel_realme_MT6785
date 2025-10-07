@@ -18,5 +18,3 @@ obj-y += misc/
 #ifdef OPLUS_FEATURE_LOG_CORE
 obj-$(CONFIG_OPLUS_FEATURE_LOG_CORE) += olc/
 #endif /* OPLUS_FEATURE_LOG_CORE */
-
-obj-y += mm/

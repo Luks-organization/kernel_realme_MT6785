@@ -43,15 +43,20 @@ static int __init update_feature(void)
 	fs = get_fs();
 	pr_err("%s: oldcdt -- Operator Version [%d]\n", __func__, (get_project()));
 	set_fs(KERNEL_DS);
+
 	if (oplus_info) {
-            //#ifdef OPLUS_BUG_STABILITY
-            //18073 includes 18073,18075,18593
-            //19011 includes 19011,19305 exclude 19301
-            if (get_project() == 18073 || (get_project() == 19011 && get_Operator_Version() != 80)) {
-                proc_symlink(nfc_feature, oplus_info, feature_src);
-            }
-            //#endif /* OPLUS_BUG_STABILITY */
+		/*#ifdef OPLUS_BUG_STABILITY
+		*18073 includes 18073,18075,18593
+		*19011 includes 19011,19305 exclude 19301
+		*/
+		if (get_project() == 18073 || (get_project() == 19011
+					       && get_Operator_Version() != 80)) {
+			proc_symlink(nfc_feature, oplus_info, feature_src);
+		}
+
+		/*#endif /* OPLUS_BUG_STABILITY */
 	}
+
 	set_fs(fs);
 	return 0;
 }
