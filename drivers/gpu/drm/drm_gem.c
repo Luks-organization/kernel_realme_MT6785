@@ -448,15 +448,14 @@ int drm_gem_handle_create(struct drm_file *file_priv,
 			  struct drm_gem_object *obj,
 			  u32 *handlep)
 {
-	if (!&obj || (!&obj->dev) || (!&obj->dev->object_name_lock))
-		return -1;
+	if (!obj || !obj->dev)
+		return -EINVAL;
 
 	mutex_lock(&obj->dev->object_name_lock);
 
 	return drm_gem_handle_create_tail(file_priv, obj, handlep);
 }
 EXPORT_SYMBOL(drm_gem_handle_create);
-
 
 /**
  * drm_gem_free_mmap_offset - release a fake mmap offset for an object

@@ -141,22 +141,7 @@ static void evdi_connector_destroy(struct drm_connector *connector)
 
 static struct drm_encoder *evdi_best_encoder(struct drm_connector *connector)
 {
-#if KERNEL_VERSION(5, 5, 0) <= LINUX_VERSION_CODE || defined(EL8)
-	struct drm_encoder *encoder;
-
-	drm_connector_for_each_possible_encoder(connector, encoder) {
-		return encoder;
-	}
-
-	return NULL;
-#elif KERNEL_VERSION(4, 15, 0) <= LINUX_VERSION_CODE || defined(CONFIG_ARCH_QCOM)
-	return drm_encoder_find(connector->dev,
-				NULL,
-				connector->encoder_ids[0]);
-#else
-	return drm_encoder_find(connector->dev,
-				connector->encoder_ids[0]);
-#endif
+    return drm_encoder_find(connector->dev, NULL, connector->encoder_ids[0]);
 }
 
 static struct drm_connector_helper_funcs evdi_connector_helper_funcs = {
