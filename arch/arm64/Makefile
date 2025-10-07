@@ -58,6 +58,14 @@ $(warning Detected assembler with broken .inst; disassembly will be unreliable)
   endif
 endif
 
+# Optimize MT6785V/CD
+KBUILD_CFLAGS   += -march=armv8.2-a+crypto+fp16+dotprod+nosve -mcpu=cortex-a76
+KBUILD_AFLAGS   += -march=armv8.2-a+crypto+fp16+dotprod+nosve -mcpu=cortex-a55
+
+ifeq ($(CONFIG_LD_IS_LLD), y)
+KBUILD_LDFLAGS  += -mllvm -mcpu=cortex-a76
+endif
+
 ifeq ($(CONFIG_COMPAT_VDSO), y)
   CROSS_COMPILE_COMPAT ?= $(CONFIG_CROSS_COMPILE_COMPAT:"%"=%)
 
@@ -84,9 +92,6 @@ ifeq ($(CONFIG_COMPAT_VDSO), y)
     vdso32 := -DCONFIG_VDSO32=1
   endif
 endif
-
-# Optimize for CPU - CLANG
-KBUILD_CFLAGS   += $(call cc-option,-march=armv8-a+crypto+crc,) $(call cc-option,-mcpu=cortex-a55+crypto+crc,)
 
 ifeq ($(cc-name),clang)
 # This is a workaround for https://bugs.llvm.org/show_bug.cgi?id=30792.
