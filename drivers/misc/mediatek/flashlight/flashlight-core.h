@@ -15,7 +15,7 @@
 #define _FLASHLIGHT_CORE_H
 
 #include <linux/list.h>
-#include <mediatek/flashlight.h>
+#include "flashlight.h"
 
 /* protocol version */
 #define FLASHLIGHT_PROTOCOL_VERSION 2

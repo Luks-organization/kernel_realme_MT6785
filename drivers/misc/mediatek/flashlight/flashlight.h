@@ -11,8 +11,8 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _UAPI_FLASHLIGHT_H
-#define _UAPI_FLASHLIGHT_H
+#ifndef _FLASHLIGHT_H
+#define _FLASHLIGHT_H
 
 #include <linux/types.h>
 #include <linux/ioctl.h>
@@ -113,5 +113,5 @@ struct flashlight_user_arg {
 #define FLASH_IOC_GET_HW_FAULT             _IOR(FLASHLIGHT_MAGIC, 250, int)
 #define FLASH_IOC_GET_HW_FAULT2            _IOR(FLASHLIGHT_MAGIC, 251, int)
 
-#endif /* _UAPI_FLASHLIGHT_H */
+#endif /* _FLASHLIGHT_H */
 
